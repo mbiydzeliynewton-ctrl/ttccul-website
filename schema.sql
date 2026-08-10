@@ -214,6 +214,37 @@ By encouraging saving habits and providing accessible credit, we contribute to p
 where not exists (select 1 from public.site_content);
 
 -- ============================================================
+-- STORAGE — board member photos & downloadable form files
+-- Safe to re-run.
+-- ============================================================
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values
+  ('board-photos', 'board-photos', true, 5242880, array['image/png','image/jpeg','image/webp','image/gif']),
+  ('forms-files', 'forms-files', true, 10485760, array['application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document'])
+on conflict (id) do update set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
+
+do $$
+declare
+  admin_email text := 'info@ttccul.com';
+  b text;
+begin
+  foreach b in array array['board-photos','forms-files']
+  loop
+    execute format('drop policy if exists "public read %s" on storage.objects;', b);
+    execute format('create policy "public read %s" on storage.objects for select using (bucket_id = %L);', b, b);
+
+    execute format('drop policy if exists "admin write %s" on storage.objects;', b);
+    execute format(
+      'create policy "admin write %s" on storage.objects for all to authenticated using (bucket_id = %L and (auth.jwt() ->> ''email'') = %L) with check (bucket_id = %L and (auth.jwt() ->> ''email'') = %L);',
+      b, b, admin_email, b, admin_email
+    );
+  end loop;
+end $$;
+
+-- ============================================================
 -- DONE. Next: Authentication → Users → Add User, using the
 -- real TTCCUL admin email and a password you set there.
 -- That's the only login admin.html will ever accept.

@@ -71,6 +71,18 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .form-field textarea.lg { min-height: 160px; }
 .form-hint { font-size: 0.78rem; color: var(--muted); margin-top: 6px; }
 
+.file-widget { border: 1.5px dashed var(--line); border-radius: var(--radius-sm); padding: 14px; }
+.file-preview { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.file-preview img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 1px solid var(--line); }
+.file-preview .file-doc-icon { width: 40px; height: 40px; border-radius: var(--radius-sm); background: var(--leaf-tint); color: var(--tea-green); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.file-preview .file-empty { color: var(--muted); font-size: 0.85rem; }
+.file-preview a { font-size: 0.85rem; font-weight: 600; color: var(--tea-green); word-break: break-all; }
+.file-widget-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.file-widget-actions input[type="file"] { font-size: 0.82rem; }
+.upload-status { font-size: 0.78rem; color: var(--muted); margin-top: 6px; }
+.upload-status.error { color: var(--danger); }
+.upload-status.success { color: var(--tea-green); }
+
 /* ---------- LOGIN ---------- */
 .login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(160deg, var(--ink-navy) 0%, var(--slate-blue) 100%); padding: 24px; }
 .login-card { background: var(--white); border-radius: var(--radius-lg); padding: 44px 36px; width: 100%; max-width: 400px; box-shadow: var(--shadow-lift); }
@@ -314,7 +326,7 @@ const tableConfigs = {
     fields: [
       { key: 'role', label: 'Role', type: 'text', required: true },
       { key: 'name', label: 'Name (leave blank to show "Profile Coming Soon")', type: 'text' },
-      { key: 'photo_url', label: 'Photo URL (optional)', type: 'text' },
+      { key: 'photo_url', label: 'Photo', type: 'file', bucket: 'board-photos', accept: 'image/png,image/jpeg,image/webp,image/gif', preview: 'image', maxMB: 5 },
       { key: 'sort_order', label: 'Sort Order', type: 'number', default: 0 }
     ],
     listTitle: function (r) { return r.role; },
@@ -347,7 +359,7 @@ const tableConfigs = {
     fields: [
       { key: 'name', label: 'Name', type: 'text', required: true },
       { key: 'description', label: 'Description', type: 'textarea' },
-      { key: 'file_url', label: 'File URL (optional)', type: 'text' },
+      { key: 'file_url', label: 'File', type: 'file', bucket: 'forms-files', accept: '.pdf,.doc,.docx', preview: 'file', maxMB: 10 },
       { key: 'sort_order', label: 'Sort Order', type: 'number', default: 0 }
     ],
     listTitle: function (r) { return r.name; }
@@ -508,6 +520,29 @@ document.getElementById('crud-list').addEventListener('click', function (e) {
 document.getElementById('addNewBtn').addEventListener('click', function () { openForm(null); });
 document.getElementById('cancelBtn').addEventListener('click', function () { document.getElementById('crud-form-wrap').hidden = true; });
 
+const DOC_ICON_SVG = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M9 13h6M9 17h6M9 9h1"/></svg>';
+
+function filePreviewHTML(f, val) {
+  if (!val) return '<span class="file-empty">No file uploaded yet</span>';
+  if (f.preview === 'image') return '<img src="' + escapeHTML(val) + '" alt="">';
+  return '<div class="file-doc-icon">' + DOC_ICON_SVG + '</div><a href="' + escapeHTML(val) + '" target="_blank" rel="noopener">View current file</a>';
+}
+
+function renderFileField(f, val) {
+  return '<div class="form-field">' +
+    '<label>' + escapeHTML(f.label) + '</label>' +
+    '<div class="file-widget" data-bucket="' + f.bucket + '" data-max-mb="' + f.maxMB + '">' +
+      '<div class="file-preview" data-preview-for="' + f.key + '">' + filePreviewHTML(f, val) + '</div>' +
+      '<div class="file-widget-actions">' +
+        '<input type="file" accept="' + f.accept + '" data-upload-for="' + f.key + '">' +
+        (val ? '<button type="button" class="btn btn-outline btn-sm" data-clear-for="' + f.key + '">Remove</button>' : '') +
+      '</div>' +
+      '<p class="upload-status" data-status-for="' + f.key + '"></p>' +
+    '</div>' +
+    '<input type="hidden" data-field="' + f.key + '" value="' + escapeHTML(val) + '">' +
+  '</div>';
+}
+
 function openForm(id) {
   const cfg = tableConfigs[currentSection];
   editingId = id;
@@ -519,6 +554,7 @@ function openForm(id) {
   const fieldsEl = document.getElementById('crud-form-fields');
   fieldsEl.innerHTML = cfg.fields.map(function (f) {
     const val = row ? (row[f.key] !== null && row[f.key] !== undefined ? row[f.key] : '') : (f.default !== undefined ? f.default : '');
+    if (f.type === 'file') return renderFileField(f, val);
     if (f.type === 'textarea') {
       return '<div class="form-field"><label>' + escapeHTML(f.label) + '</label><textarea data-field="' + f.key + '"' + (f.required ? ' required' : '') + '>' + escapeHTML(val) + '</textarea></div>';
     }
@@ -533,6 +569,70 @@ function openForm(id) {
   const wrapEl = document.getElementById('crud-form-wrap');
   if (typeof wrapEl.scrollIntoView === 'function') wrapEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
+
+// ============================================
+// FILE UPLOADS (board photos, form documents)
+// ============================================
+document.getElementById('crud-form-fields').addEventListener('change', async function (e) {
+  const input = e.target.closest('input[type="file"][data-upload-for]');
+  if (!input || !input.files || !input.files[0]) return;
+  const file = input.files[0];
+  const fieldKey = input.dataset.uploadFor;
+  const widget = input.closest('.file-widget');
+  const bucket = widget.dataset.bucket;
+  const maxMB = Number(widget.dataset.maxMb || 10);
+  const statusEl = widget.querySelector('[data-status-for="' + fieldKey + '"]');
+  const previewEl = widget.querySelector('[data-preview-for="' + fieldKey + '"]');
+  const hiddenInput = document.querySelector('#crud-form-fields [data-field="' + fieldKey + '"]');
+  const fieldMeta = tableConfigs[currentSection].fields.find(function (fl) { return fl.key === fieldKey; });
+
+  if (file.size > maxMB * 1024 * 1024) {
+    statusEl.textContent = 'That file is too large — max ' + maxMB + 'MB.';
+    statusEl.className = 'upload-status error';
+    input.value = '';
+    return;
+  }
+
+  statusEl.textContent = 'Uploading…';
+  statusEl.className = 'upload-status';
+
+  const safeExt = (file.name.split('.').pop() || 'bin').toLowerCase().replace(/[^a-z0-9]/g, '') || 'bin';
+  const path = fieldKey + '/' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.' + safeExt;
+
+  const { error: upErr } = await db.storage.from(bucket).upload(path, file, { upsert: false, contentType: file.type || undefined });
+  if (upErr) {
+    statusEl.textContent = 'Upload failed: ' + upErr.message;
+    statusEl.className = 'upload-status error';
+    input.value = '';
+    return;
+  }
+
+  const { data: urlData } = db.storage.from(bucket).getPublicUrl(path);
+  hiddenInput.value = urlData.publicUrl;
+  statusEl.textContent = 'Uploaded — click Save to keep it.';
+  statusEl.className = 'upload-status success';
+  previewEl.innerHTML = filePreviewHTML(fieldMeta, urlData.publicUrl);
+
+  if (!widget.querySelector('[data-clear-for="' + fieldKey + '"]')) {
+    const clearBtn = document.createElement('button');
+    clearBtn.type = 'button';
+    clearBtn.className = 'btn btn-outline btn-sm';
+    clearBtn.dataset.clearFor = fieldKey;
+    clearBtn.textContent = 'Remove';
+    widget.querySelector('.file-widget-actions').appendChild(clearBtn);
+  }
+});
+
+document.getElementById('crud-form-fields').addEventListener('click', function (e) {
+  const btn = e.target.closest('[data-clear-for]');
+  if (!btn) return;
+  const fieldKey = btn.dataset.clearFor;
+  const widget = btn.closest('.file-widget');
+  document.querySelector('#crud-form-fields [data-field="' + fieldKey + '"]').value = '';
+  widget.querySelector('[data-preview-for="' + fieldKey + '"]').innerHTML = '<span class="file-empty">No file uploaded yet</span>';
+  widget.querySelector('[data-status-for="' + fieldKey + '"]').textContent = 'Will be removed when you click Save.';
+  btn.remove();
+});
 
 document.getElementById('saveBtn').addEventListener('click', async function () {
   const cfg = tableConfigs[currentSection];

@@ -987,7 +987,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 // Fill these in after running schema.sql (see SETUP.md).
 // Until then, the site runs entirely on the defaults below.
 // ============================================
-const SUPABASE_URL = " https://rsphnnhihngekkjzbeji.supabase.co";
+const SUPABASE_URL = "https://rsphnnhihngekkjzbeji.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzcGhubmhpaG5nZWtranpiZWppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYzMjA4NTAsImV4cCI6MjEwMTg5Njg1MH0.-keZ2nlMghxPxEYXVQ65RQlWTq0s3XiomeN7ptLY4xA";
 let db = null;
 if (typeof supabase !== 'undefined' && SUPABASE_URL.indexOf('YOUR_') !== 0) {
@@ -1049,11 +1049,11 @@ const coreValues = [
 ];
 
 const boardMembers = [
-  { role: "Board Chairperson", name: null },
-  { role: "Vice Chairperson", name: null },
-  { role: "Secretary", name: null },
-  { role: "Treasurer", name: null },
-  { role: "Supervisory Committee Member", name: null }
+  { role: "Board Chairperson", name: null, photo_url: null },
+  { role: "Vice Chairperson", name: null, photo_url: null },
+  { role: "Secretary", name: null, photo_url: null },
+  { role: "Treasurer", name: null, photo_url: null },
+  { role: "Supervisory Committee Member", name: null, photo_url: null }
 ];
 
 const newsItems = [
@@ -1064,10 +1064,10 @@ const newsItems = [
 const reports = [];
 
 const downloadForms = [
-  { name: "Membership Application Form", desc: "Start your journey to becoming a TTCCUL member." },
-  { name: "Account Opening Form", desc: "Open a savings, deposit or shares account." },
-  { name: "Loan Application Form", desc: "Apply for a personal, business or agricultural loan." },
-  { name: "Next of Kin Form", desc: "Keep your account details safe and up to date." }
+  { name: "Membership Application Form", desc: "Start your journey to becoming a TTCCUL member.", file_url: null },
+  { name: "Account Opening Form", desc: "Open a savings, deposit or shares account.", file_url: null },
+  { name: "Loan Application Form", desc: "Apply for a personal, business or agricultural loan.", file_url: null },
+  { name: "Next of Kin Form", desc: "Keep your account details safe and up to date.", file_url: null }
 ];
 
 const siteContent = {
@@ -1162,10 +1162,10 @@ async function loadContent() {
 
     if (svc.data) services.splice(0, services.length, ...svc.data.map(function (r) { return { name: r.name, cat: r.category, desc: r.description }; }));
     if (val.data) coreValues.splice(0, coreValues.length, ...val.data.map(function (r) { return { title: r.title, desc: r.description, icon: r.icon }; }));
-    if (board.data) boardMembers.splice(0, boardMembers.length, ...board.data.map(function (r) { return { role: r.role, name: r.name }; }));
+    if (board.data) boardMembers.splice(0, boardMembers.length, ...board.data.map(function (r) { return { role: r.role, name: r.name, photo_url: r.photo_url }; }));
     if (news.data) newsItems.splice(0, newsItems.length, ...news.data.map(function (r) { return { title: r.title, body: r.body, tag: r.tag }; }));
     if (rep.data) reports.splice(0, reports.length, ...rep.data.map(function (r) { return { title: r.title, year: r.year, desc: r.description }; }));
-    if (frm.data) downloadForms.splice(0, downloadForms.length, ...frm.data.map(function (r) { return { name: r.name, desc: r.description }; }));
+    if (frm.data) downloadForms.splice(0, downloadForms.length, ...frm.data.map(function (r) { return { name: r.name, desc: r.description, file_url: r.file_url }; }));
     if (sc.data) sc.data.forEach(function (row) { siteContent[row.key] = row.value; });
     return true;
   } catch (err) {
@@ -1208,7 +1208,10 @@ function renderBoard() {
     const sub = m.name
       ? '<p style="font-size:0.85rem; margin-bottom:0;">' + escapeHTML(m.role) + '</p>'
       : '<span class="tag-soon">Profile Coming Soon</span>';
-    return '<div class="card" style="text-align:center;"><div class="icon-circle" style="margin:0 auto 16px; width:64px; height:64px;">' + icon('person', 28) + '</div><h4 style="font-size:0.98rem; margin-bottom:6px;">' + heading + '</h4>' + sub + '</div>';
+    const avatar = m.photo_url
+      ? '<img src="' + escapeHTML(m.photo_url) + '" alt="" style="width:64px; height:64px; border-radius:50%; object-fit:cover; margin:0 auto 16px; display:block;">'
+      : '<div class="icon-circle" style="margin:0 auto 16px; width:64px; height:64px;">' + icon('person', 28) + '</div>';
+    return '<div class="card" style="text-align:center;">' + avatar + '<h4 style="font-size:0.98rem; margin-bottom:6px;">' + heading + '</h4>' + sub + '</div>';
   }).join('');
 }
 
@@ -1243,7 +1246,10 @@ function renderForms() {
   const el = document.getElementById('formsGrid');
   if (!el) return;
   el.innerHTML = downloadForms.map(function (f) {
-    return '<div class="card" style="display:flex; gap:18px; align-items:flex-start;"><div class="icon-circle" style="flex-shrink:0;">' + icon('doc') + '</div><div><h4 style="margin-bottom:6px;">' + escapeHTML(f.name) + '</h4><p style="margin-bottom:10px;">' + escapeHTML(f.desc) + '</p><span class="tag-soon">Available at Our Office</span></div></div>';
+    const action = f.file_url
+      ? '<a href="' + escapeHTML(f.file_url) + '" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="margin-top:2px;">Download' + icon('arrow', 15) + '</a>'
+      : '<span class="tag-soon">Available at Our Office</span>';
+    return '<div class="card" style="display:flex; gap:18px; align-items:flex-start;"><div class="icon-circle" style="flex-shrink:0;">' + icon('doc') + '</div><div><h4 style="margin-bottom:6px;">' + escapeHTML(f.name) + '</h4><p style="margin-bottom:10px;">' + escapeHTML(f.desc) + '</p>' + action + '</div></div>';
   }).join('');
 }
 

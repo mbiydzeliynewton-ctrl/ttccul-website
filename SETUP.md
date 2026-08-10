@@ -16,7 +16,9 @@ Pick any name/region, set a database password (save it somewhere — not the sam
 
 In your project: **SQL Editor** → **New Query** → paste the entire contents of `schema.sql` → **Run**.
 
-This creates all the tables, locks them down (public can read, only the admin email can write), and seeds them with exactly what's already on the site today — so nothing changes visually until you actually edit something.
+This creates all the tables, locks them down (public can read, only the admin email can write), sets up storage for board photos and form uploads, and seeds them with exactly what's already on the site today — so nothing changes visually until you actually edit something.
+
+Already ran this once before? Just run it again — every part of it is safe to re-run, and it'll add the new storage buckets without touching anything else.
 
 If you ever want a different admin email, change the one line near the top of `schema.sql` (`admin_email text := 'info@ttccul.com'`) before running it, or re-run the `do $$ ... $$` block later with the new address.
 
