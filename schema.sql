@@ -10,7 +10,7 @@
 -- "permission denied" (42501) error before RLS is even checked.
 -- This script grants both layers on purpose. If you ever add a
 -- new table by hand later, remember to grant it too.
--- ============================================================
+-- ===========================================================
 
 -- ---------- SERVICES ----------
 create table if not exists public.services (

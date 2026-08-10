@@ -20,7 +20,7 @@ This creates all the tables, locks them down (public can read, only the admin em
 
 Already ran this once before? Just run it again — every part of it is safe to re-run, and it'll add the new storage buckets without touching anything else.
 
-If you ever want a different admin email, change the one line near the top of `schema.sql` (`admin_email text := 'info@ttccul.com'`) before running it, or re-run the `do $$ ... $$` block later with the new address.
+If you ever want a different admin email, change the one line near the top of `schema.sql` (`admin_email text := 'info@ttccul.com'`) before running it, or re-run the `do $$ ... $$` block later with the new address
 
 ## 3. Create the admin login
 
