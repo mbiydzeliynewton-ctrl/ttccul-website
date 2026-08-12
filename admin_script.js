@@ -1,8 +1,8 @@
 
 // ============================================
-// SUPABASE CONFIG  same project as index.html
+// SUPABASE CONFIG — same project as index.html
 // ============================================
-const SUPABASE_URL = "https://rsphnnhihngekkjzbeji.supabase.co";
+const SUPABASE_URL = " https://rsphnnhihngekkjzbeji.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzcGhubmhpaG5nZWtranpiZWppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYzMjA4NTAsImV4cCI6MjEwMTg5Njg1MH0.-keZ2nlMghxPxEYXVQ65RQlWTq0s3XiomeN7ptLY4xA";
 const isConfigured = typeof supabase !== 'undefined' && SUPABASE_URL.indexOf('YOUR_') !== 0;
 const db = isConfigured ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
@@ -52,6 +52,7 @@ const tableConfigs = {
       { key: 'role', label: 'Role', type: 'text', required: true },
       { key: 'name', label: 'Name (leave blank to show "Profile Coming Soon")', type: 'text' },
       { key: 'photo_url', label: 'Photo', type: 'file', bucket: 'board-photos', accept: 'image/png,image/jpeg,image/webp,image/gif', preview: 'image', maxMB: 5 },
+      { key: 'bio', label: 'About (shown on their "Read About" page — leave blank to hide that button)', type: 'textarea' },
       { key: 'sort_order', label: 'Sort Order', type: 'number', default: 0 }
     ],
     listTitle: function (r) { return r.role; },
@@ -68,12 +69,13 @@ const tableConfigs = {
     listTitle: function (r) { return r.title; }
   },
   reports: {
-    label: 'Annual Reports', table: 'reports', orderBy: 'sort_order',
+    label: 'Annual Reports (AGM Sessions)', table: 'reports', orderBy: 'sort_order',
     fields: [
-      { key: 'title', label: 'Title', type: 'text', required: true },
-      { key: 'year', label: 'Year', type: 'text' },
-      { key: 'description', label: 'Description', type: 'textarea' },
-      { key: 'file_url', label: 'File URL (optional)', type: 'text' },
+      { key: 'title', label: 'Title (e.g. "2025 Annual General Meeting")', type: 'text', required: true },
+      { key: 'year', label: 'Year', type: 'text', required: true },
+      { key: 'image_url', label: 'AGM Photo', type: 'file', bucket: 'agm-photos', accept: 'image/png,image/jpeg,image/webp,image/gif', preview: 'image', maxMB: 8 },
+      { key: 'description', label: 'Caption / Description', type: 'textarea' },
+      { key: 'file_url', label: 'Report Document', type: 'file', bucket: 'forms-files', accept: '.pdf,.doc,.docx', preview: 'file', maxMB: 10 },
       { key: 'sort_order', label: 'Sort Order', type: 'number', default: 0 }
     ],
     listTitle: function (r) { return r.title; },
@@ -93,6 +95,7 @@ const tableConfigs = {
 
 const siteContentGroups = [
   { title: 'Hero Section', fields: [
+    ['hero_image_url', 'AGM Crowd Photo (shown large in the hero — leave empty to keep the default logo mark)', 'image'],
     ['hero_badge', 'Badge Text', 'text'], ['hero_headline', 'Headline', 'text'], ['hero_lead', 'Lead Paragraph', 'textarea']
   ]},
   { title: 'Home Page Stats', fields: [
@@ -172,10 +175,47 @@ if (db) {
 // ============================================
 // SIDEBAR NAV
 // ============================================
+const dashboardScreen = document.getElementById('dashboardScreen');
+const sidebar = document.querySelector('.sidebar');
+const sidebarToggle = document.getElementById('sidebarToggle');
+const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+
+function closeSidebar() {
+  dashboardScreen.classList.remove('sidebar-open');
+  if (sidebar) sidebar.classList.remove('open');
+  if (sidebarBackdrop) sidebarBackdrop.classList.remove('visible');
+}
+function openSidebar() {
+  dashboardScreen.classList.add('sidebar-open');
+  if (sidebar) sidebar.classList.add('open');
+  if (sidebarBackdrop) sidebarBackdrop.classList.add('visible');
+}
+function toggleSidebar() {
+  if (sidebar && sidebar.classList.contains('open')) {
+    closeSidebar();
+  } else {
+    openSidebar();
+  }
+}
+
 document.getElementById('sidebarNav').addEventListener('click', function (e) {
   const btn = e.target.closest('button[data-section]');
-  if (btn) selectSection(btn.dataset.section);
+  if (btn) {
+    selectSection(btn.dataset.section);
+    closeSidebar();
+  }
 });
+
+if (sidebarToggle) {
+  sidebarToggle.addEventListener('click', function () {
+    toggleSidebar();
+  });
+}
+if (sidebarBackdrop) {
+  sidebarBackdrop.addEventListener('click', function () {
+    closeSidebar();
+  });
+}
 
 function selectSection(section) {
   currentSection = section;
@@ -199,25 +239,6 @@ function selectSection(section) {
     document.getElementById('sectionTitle').textContent = cfg.label;
     loadTable(section);
   }
-
-  if (window.matchMedia('(max-width: 820px)').matches) {
-    const sidebarNav = document.getElementById('sidebarNav');
-    const navToggle = document.getElementById('sidebarToggle');
-    if (sidebarNav && navToggle) {
-      sidebarNav.classList.remove('open');
-      navToggle.setAttribute('aria-expanded', 'false');
-    }
-  }
-}
-
-const sidebarNavToggle = document.getElementById('sidebarToggle');
-if (sidebarNavToggle) {
-  sidebarNavToggle.addEventListener('click', function () {
-    const sidebarNav = document.getElementById('sidebarNav');
-    if (!sidebarNav) return;
-    const isOpen = sidebarNav.classList.toggle('open');
-    this.setAttribute('aria-expanded', isOpen);
-  });
 }
 
 // ============================================
@@ -430,6 +451,21 @@ async function loadSiteContent() {
     const rows = group.fields.map(function (f) {
       const key = f[0], label = f[1], type = f[2];
       const val = values[key] !== undefined ? values[key] : '';
+      if (type === 'image') {
+        const fakeField = { key: key, preview: 'image' };
+        return '<div class="form-field" style="grid-column:1/-1;">' +
+          '<label>' + escapeHTML(label) + '</label>' +
+          '<div class="file-widget" data-bucket="agm-photos" data-max-mb="8" data-sc-image="true">' +
+            '<div class="file-preview" data-preview-for="' + key + '">' + filePreviewHTML(fakeField, val) + '</div>' +
+            '<div class="file-widget-actions">' +
+              '<input type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-upload-for="' + key + '">' +
+              (val ? '<button type="button" class="btn btn-outline btn-sm" data-clear-for="' + key + '">Remove</button>' : '') +
+            '</div>' +
+            '<p class="upload-status" data-status-for="' + key + '"></p>' +
+          '</div>' +
+          '<input type="hidden" data-sc-field="' + key + '" value="' + escapeHTML(val) + '">' +
+        '</div>';
+      }
       if (type === 'textarea' || type === 'textarea-lg') {
         return '<div class="form-field" style="grid-column:1/-1;"><label>' + escapeHTML(label) + '</label><textarea class="' + (type === 'textarea-lg' ? 'lg' : '') + '" data-sc-field="' + key + '">' + escapeHTML(val) + '</textarea></div>';
       }
@@ -438,6 +474,66 @@ async function loadSiteContent() {
     return '<div class="sc-group"><h3>' + escapeHTML(group.title) + '</h3><div class="sc-row">' + rows + '</div></div>';
   }).join('');
 }
+
+// Image upload inside the Site Content panel reuses the same
+// upload/remove listeners as the CRUD forms, just scoped to this container.
+document.getElementById('siteContentGroups').addEventListener('change', async function (e) {
+  const input = e.target.closest('input[type="file"][data-upload-for]');
+  if (!input || !input.files || !input.files[0]) return;
+  const file = input.files[0];
+  const fieldKey = input.dataset.uploadFor;
+  const widget = input.closest('.file-widget');
+  const bucket = widget.dataset.bucket;
+  const maxMB = Number(widget.dataset.maxMb || 8);
+  const statusEl = widget.querySelector('[data-status-for="' + fieldKey + '"]');
+  const previewEl = widget.querySelector('[data-preview-for="' + fieldKey + '"]');
+  const hiddenInput = document.querySelector('[data-sc-field="' + fieldKey + '"]');
+
+  if (file.size > maxMB * 1024 * 1024) {
+    statusEl.textContent = 'That file is too large — max ' + maxMB + 'MB.';
+    statusEl.className = 'upload-status error';
+    input.value = '';
+    return;
+  }
+  statusEl.textContent = 'Uploading…';
+  statusEl.className = 'upload-status';
+
+  const safeExt = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+  const path = fieldKey + '/' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.' + safeExt;
+  const { error: upErr } = await db.storage.from(bucket).upload(path, file, { upsert: false, contentType: file.type || undefined });
+  if (upErr) {
+    statusEl.textContent = 'Upload failed: ' + upErr.message;
+    statusEl.className = 'upload-status error';
+    input.value = '';
+    return;
+  }
+  const { data: urlData } = db.storage.from(bucket).getPublicUrl(path);
+  hiddenInput.value = urlData.publicUrl;
+  statusEl.textContent = 'Uploaded — click "Save All Changes" to keep it.';
+  statusEl.className = 'upload-status success';
+  previewEl.innerHTML = filePreviewHTML({ preview: 'image' }, urlData.publicUrl);
+
+  if (!widget.querySelector('[data-clear-for="' + fieldKey + '"]')) {
+    const clearBtn = document.createElement('button');
+    clearBtn.type = 'button';
+    clearBtn.className = 'btn btn-outline btn-sm';
+    clearBtn.dataset.clearFor = fieldKey;
+    clearBtn.textContent = 'Remove';
+    widget.querySelector('.file-widget-actions').appendChild(clearBtn);
+  }
+});
+
+document.getElementById('siteContentGroups').addEventListener('click', function (e) {
+  const btn = e.target.closest('[data-clear-for]');
+  if (!btn) return;
+  const fieldKey = btn.dataset.clearFor;
+  const widget = btn.closest('.file-widget');
+  document.querySelector('[data-sc-field="' + fieldKey + '"]').value = '';
+  widget.querySelector('[data-preview-for="' + fieldKey + '"]').innerHTML = '<span class="file-empty">No file uploaded yet</span>';
+  widget.querySelector('[data-status-for="' + fieldKey + '"]').textContent = 'Will be removed when you click "Save All Changes".';
+  btn.remove();
+});
+
 
 document.getElementById('saveSiteContentBtn').addEventListener('click', async function () {
   const inputs = Array.from(document.querySelectorAll('[data-sc-field]'));

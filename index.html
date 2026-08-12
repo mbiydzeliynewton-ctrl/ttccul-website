@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link href="style.css" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 
 </head>
 <body>
@@ -35,6 +35,14 @@
       <a href="#about" class="nav-link" data-page="about">About Us</a>
       <a href="#services" class="nav-link" data-page="services">Services</a>
       <a href="#membership" class="nav-link" data-page="membership">Membership</a>
+      <div class="nav-item-dropdown">
+        <a href="#reports" class="nav-link" data-page="reports">Annual Reports
+          <svg class="chev" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </a>
+        <div class="nav-dropdown-menu" id="reportsYearMenu">
+          <a href="#reports">All Years</a>
+        </div>
+      </div>
       <a href="#contact" class="nav-link" data-page="contact">Contact Us</a>
     </nav>
 
@@ -90,7 +98,7 @@
       </div>
 
       <div class="hero-visual">
-        <div class="hero-mark-ring">
+        <div class="hero-mark-ring" id="heroMarkRing">
           <div class="ring-line"></div>
           <svg class="mark" viewBox="0 0 100 100" aria-hidden="true">
             <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="2" opacity="0.4"/>
@@ -101,6 +109,7 @@
             <circle cx="50" cy="75" r="4" fill="currentColor"/>
           </svg>
         </div>
+        <img class="hero-photo" id="heroPhoto" alt="TTCCUL members at an Annual General Meeting" hidden>
       </div>
     </div>
 
@@ -391,7 +400,7 @@
           <h4>Call Us</h4>
           <p><span data-content="contact_phone_1">675 062 254</span><br><span data-content="contact_phone_2">674 227 692</span></p>
         </div>
-        <div class="card" style="text-align:center; cursor:pointer;" onclick="window.location.href='mailto:info@ttccul.com'">
+        <div class="card" style="text-align:center;">
           <div class="icon-circle" style="margin:0 auto 18px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 6-10 7L2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg></div>
           <h4>Email Us</h4>
           <p data-content="contact_email">info@ttccul.com</p>
@@ -444,6 +453,21 @@
 </section>
 
 <!-- ============================================
+     PAGE: BOARD MEMBER DETAIL (dynamic - populated per member)
+     ============================================ -->
+<section class="page" id="board-detail" data-title="Board Member">
+  <div class="section page-top">
+    <div class="container" style="max-width:760px;">
+      <a href="#board" data-page="board" class="btn btn-outline btn-sm" style="margin-bottom:32px;">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+        Back to Board
+      </a>
+      <div id="boardDetailContent"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
      PAGE: NEWS
      ============================================ -->
 <section class="page" id="news" data-title="News &amp; Updates">
@@ -469,7 +493,8 @@
         <h2>Annual Reports</h2>
         <p class="lead">Our annual reports will be published here as they become available, in keeping with our commitment to transparency with every member.</p>
       </div>
-      <div class="grid grid-3 reveal" id="reportsGrid"></div>
+      <div class="reveal" id="reportsYearPills" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:28px;"></div>
+      <div class="reveal" id="reportsGrid"></div>
     </div>
   </div>
 </section>

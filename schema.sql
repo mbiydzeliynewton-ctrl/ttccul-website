@@ -10,7 +10,7 @@
 -- "permission denied" (42501) error before RLS is even checked.
 -- This script grants both layers on purpose. If you ever add a
 -- new table by hand later, remember to grant it too.
--- ===========================================================
+-- ============================================================
 
 -- ---------- SERVICES ----------
 create table if not exists public.services (
@@ -39,9 +39,11 @@ create table if not exists public.board_members (
   role text not null,
   name text,
   photo_url text,
+  bio text,
   sort_order int not null default 0
 );
 alter table public.board_members enable row level security;
+alter table public.board_members add column if not exists bio text;
 
 -- ---------- NEWS ----------
 create table if not exists public.news_items (
@@ -69,11 +71,13 @@ create table if not exists public.reports (
   id uuid primary key default gen_random_uuid(),
   title text not null,
   year text,
+  image_url text,
   file_url text,
   description text,
   sort_order int not null default 0
 );
 alter table public.reports enable row level security;
+alter table public.reports add column if not exists image_url text;
 
 -- ---------- SITE TEXT CONTENT (key/value) ----------
 create table if not exists public.site_content (
@@ -213,6 +217,12 @@ By encouraging saving habits and providing accessible credit, we contribute to p
 ) as v(key, value)
 where not exists (select 1 from public.site_content);
 
+-- Added later than the block above — its own guard so it still
+-- gets inserted even on databases that already ran the seed once.
+insert into public.site_content (key, value)
+values ('hero_image_url', '')
+on conflict (key) do nothing;
+
 -- ============================================================
 -- STORAGE — board member photos & downloadable form files
 -- Safe to re-run.
@@ -220,7 +230,8 @@ where not exists (select 1 from public.site_content);
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values
   ('board-photos', 'board-photos', true, 5242880, array['image/png','image/jpeg','image/webp','image/gif']),
-  ('forms-files', 'forms-files', true, 10485760, array['application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document'])
+  ('forms-files', 'forms-files', true, 10485760, array['application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document']),
+  ('agm-photos', 'agm-photos', true, 8388608, array['image/png','image/jpeg','image/webp','image/gif'])
 on conflict (id) do update set
   public = excluded.public,
   file_size_limit = excluded.file_size_limit,
@@ -231,7 +242,7 @@ declare
   admin_email text := 'info@ttccul.com';
   b text;
 begin
-  foreach b in array array['board-photos','forms-files']
+  foreach b in array array['board-photos','forms-files','agm-photos']
   loop
     execute format('drop policy if exists "public read %s" on storage.objects;', b);
     execute format('create policy "public read %s" on storage.objects for select using (bucket_id = %L);', b, b);

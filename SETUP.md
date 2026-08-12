@@ -18,9 +18,9 @@ In your project: **SQL Editor** → **New Query** → paste the entire contents 
 
 This creates all the tables, locks them down (public can read, only the admin email can write), sets up storage for board photos and form uploads, and seeds them with exactly what's already on the site today — so nothing changes visually until you actually edit something.
 
-Already ran this once before? Just run it again — every part of it is safe to re-run, and it'll add the new storage buckets without touching anything else.
+Already ran this once before? Just run it again — every part of it is safe to re-run. Each version has only ever added things (new columns, a new storage bucket), never removed or reset anything you've already entered.
 
-If you ever want a different admin email, change the one line near the top of `schema.sql` (`admin_email text := 'info@ttccul.com'`) before running it, or re-run the `do $$ ... $$` block later with the new address
+If you ever want a different admin email, change the one line near the top of `schema.sql` (`admin_email text := 'info@ttccul.com'`) before running it, or re-run the `do $$ ... $$` block later with the new address.
 
 ## 3. Create the admin login
 

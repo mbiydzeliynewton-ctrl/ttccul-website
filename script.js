@@ -4,7 +4,7 @@
 // Fill these in after running schema.sql (see SETUP.md).
 // Until then, the site runs entirely on the defaults below.
 // ============================================
-const SUPABASE_URL = "https://rsphnnhihngekkjzbeji.supabase.co";
+const SUPABASE_URL = " https://rsphnnhihngekkjzbeji.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzcGhubmhpaG5nZWtranpiZWppIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYzMjA4NTAsImV4cCI6MjEwMTg5Njg1MH0.-keZ2nlMghxPxEYXVQ65RQlWTq0s3XiomeN7ptLY4xA";
 let db = null;
 if (typeof supabase !== 'undefined' && SUPABASE_URL.indexOf('YOUR_') !== 0) {
@@ -22,7 +22,7 @@ function escapeHTML(str) {
 }
 
 // ============================================
-// DATA - hardcoded defaults. Supabase (once configured)
+// DATA — hardcoded defaults. Supabase (once configured)
 // overrides all of this after page load; if it's not
 // configured, or the fetch fails, the site runs on
 // exactly what's below, unchanged.
@@ -66,11 +66,11 @@ const coreValues = [
 ];
 
 const boardMembers = [
-  { role: "Board Chairperson", name: null, photo_url: null },
-  { role: "Vice Chairperson", name: null, photo_url: null },
-  { role: "Secretary", name: null, photo_url: null },
-  { role: "Treasurer", name: null, photo_url: null },
-  { role: "Supervisory Committee Member", name: null, photo_url: null }
+  { id: "default-1", role: "Board Chairperson", name: null, photo_url: null, bio: null },
+  { id: "default-2", role: "Vice Chairperson", name: null, photo_url: null, bio: null },
+  { id: "default-3", role: "Secretary", name: null, photo_url: null, bio: null },
+  { id: "default-4", role: "Treasurer", name: null, photo_url: null, bio: null },
+  { id: "default-5", role: "Supervisory Committee Member", name: null, photo_url: null, bio: null }
 ];
 
 const newsItems = [
@@ -88,16 +88,17 @@ const downloadForms = [
 ];
 
 const siteContent = {
+  hero_image_url: "",
   hero_badge: "Serving Tole-Buea Since 1970",
   hero_headline: "Where Community Saves, Grows & Thrives Together",
-  hero_lead: "A member-owned cooperative credit union built on mutual trust - savings, loans and financial inclusion for the people of Tole and beyond, at fair and honest rates.",
+  hero_lead: "A member-owned cooperative credit union built on mutual trust — savings, loans and financial inclusion for the people of Tole and beyond, at fair and honest rates.",
   stat1_value: "1970", stat1_label: "Founded",
   stat2_value: "56+", stat2_label: "Years of Continuous Service",
   stat3_value: "21+", stat3_label: "Products & Services Offered",
   stat4_value: "5", stat4_label: "Core Values We Operate By",
-  mission_text: "To continuously develop and sustain a secure, law-abiding cooperative credit union that provides quick and reliable financial services to our members for their financial and social development - while paying a fair rate of interest on their savings.",
-  vision_text: "To become a one-stop-shop financial institution, offering every product and service found at other microfinance institutions - delivering digital, accessible financial inclusion to our members at competitive rates.",
-  about_overview: "As a microfinance institution, we promote financial inclusion by offering affordable financial services - especially to low- and middle-income individuals with limited access to commercial banks.\n\nWe mobilize savings from our members and use these funds to grant loans at fair, relatively low interest rates. TTCCUL operates on the principle of mutual assistance and democratic control: every member holds equal voting rights, regardless of the amount they've saved.\n\nBy encouraging saving habits and providing accessible credit, we contribute to poverty reduction, entrepreneurship development, and improved living standards across the communities we serve.",
+  mission_text: "To continuously develop and sustain a secure, law-abiding cooperative credit union that provides quick and reliable financial services to our members for their financial and social development — while paying a fair rate of interest on their savings.",
+  vision_text: "To become a one-stop-shop financial institution, offering every product and service found at other microfinance institutions — delivering digital, accessible financial inclusion to our members at competitive rates.",
+  about_overview: "As a microfinance institution, we promote financial inclusion by offering affordable financial services — especially to low- and middle-income individuals with limited access to commercial banks.\n\nWe mobilize savings from our members and use these funds to grant loans at fair, relatively low interest rates. TTCCUL operates on the principle of mutual assistance and democratic control: every member holds equal voting rights, regardless of the amount they've saved.\n\nBy encouraging saving habits and providing accessible credit, we contribute to poverty reduction, entrepreneurship development, and improved living standards across the communities we serve.",
   gm_quote: "For over five decades, Tole Tea Cooperative Credit Union has stood by our members through every season. We built this institution on trust, fairness, and the belief that when our members thrive, we all thrive.",
   gm_name: "Joseph Atabong Beja",
   gm_title: "General Manager",
@@ -157,10 +158,23 @@ function applySiteContent() {
       el.href = 'https://wa.me/' + String(siteContent.whatsapp_number).replace(/[^0-9]/g, '');
     }
   });
+
+  const heroPhoto = document.getElementById('heroPhoto');
+  const heroMarkRing = document.getElementById('heroMarkRing');
+  if (heroPhoto && heroMarkRing) {
+    if (siteContent.hero_image_url) {
+      heroPhoto.src = siteContent.hero_image_url;
+      heroPhoto.hidden = false;
+      heroMarkRing.hidden = true;
+    } else {
+      heroPhoto.hidden = true;
+      heroMarkRing.hidden = false;
+    }
+  }
 }
 
 // ============================================
-// LOAD FROM SUPABASE - overrides defaults in place.
+// LOAD FROM SUPABASE — overrides defaults in place.
 // Returns true if anything was actually fetched.
 // ============================================
 async function loadContent() {
@@ -179,9 +193,9 @@ async function loadContent() {
 
     if (svc.data) services.splice(0, services.length, ...svc.data.map(function (r) { return { name: r.name, cat: r.category, desc: r.description }; }));
     if (val.data) coreValues.splice(0, coreValues.length, ...val.data.map(function (r) { return { title: r.title, desc: r.description, icon: r.icon }; }));
-    if (board.data) boardMembers.splice(0, boardMembers.length, ...board.data.map(function (r) { return { role: r.role, name: r.name, photo_url: r.photo_url }; }));
+    if (board.data) boardMembers.splice(0, boardMembers.length, ...board.data.map(function (r) { return { id: r.id, role: r.role, name: r.name, photo_url: r.photo_url, bio: r.bio }; }));
     if (news.data) newsItems.splice(0, newsItems.length, ...news.data.map(function (r) { return { title: r.title, body: r.body, tag: r.tag }; }));
-    if (rep.data) reports.splice(0, reports.length, ...rep.data.map(function (r) { return { title: r.title, year: r.year, desc: r.description }; }));
+    if (rep.data) reports.splice(0, reports.length, ...rep.data.map(function (r) { return { id: r.id, title: r.title, year: r.year, desc: r.description, image_url: r.image_url, file_url: r.file_url }; }));
     if (frm.data) downloadForms.splice(0, downloadForms.length, ...frm.data.map(function (r) { return { name: r.name, desc: r.description, file_url: r.file_url }; }));
     if (sc.data) sc.data.forEach(function (row) { siteContent[row.key] = row.value; });
     return true;
@@ -192,7 +206,7 @@ async function loadContent() {
 }
 
 // ============================================
-// RENDER - data-driven sections (uses filter())
+// RENDER — data-driven sections (uses filter())
 // ============================================
 function renderValues() {
   const el = document.getElementById('valuesGrid');
@@ -223,20 +237,41 @@ function renderBoard() {
   el.innerHTML = boardMembers.map(function (m) {
     const heading = m.name ? escapeHTML(m.name) : escapeHTML(m.role);
     const sub = m.name
-      ? '<p style="font-size:0.85rem; margin-bottom:0;">' + escapeHTML(m.role) + '</p>'
+      ? '<p style="font-size:0.85rem; margin-bottom:12px;">' + escapeHTML(m.role) + '</p>'
       : '<span class="tag-soon">Profile Coming Soon</span>';
     const avatar = m.photo_url
       ? '<img src="' + escapeHTML(m.photo_url) + '" alt="" style="width:64px; height:64px; border-radius:50%; object-fit:cover; margin:0 auto 16px; display:block;">'
       : '<div class="icon-circle" style="margin:0 auto 16px; width:64px; height:64px;">' + icon('person', 28) + '</div>';
-    return '<div class="card" style="text-align:center;">' + avatar + '<h4 style="font-size:0.98rem; margin-bottom:6px;">' + heading + '</h4>' + sub + '</div>';
+    const readMore = m.name
+      ? '<a href="#board/' + encodeURIComponent(m.id) + '" data-page="board" class="btn btn-outline btn-sm" style="margin-top:4px;">Read About</a>'
+      : '';
+    return '<div class="card" style="text-align:center;">' + avatar + '<h4 style="font-size:0.98rem; margin-bottom:6px;">' + heading + '</h4>' + sub + readMore + '</div>';
   }).join('');
+}
+
+function renderBoardDetail(m) {
+  const el = document.getElementById('boardDetailContent');
+  if (!el) return;
+  const avatar = m.photo_url
+    ? '<img src="' + escapeHTML(m.photo_url) + '" alt="" style="width:100%; max-width:340px; aspect-ratio:1; object-fit:cover; border-radius:var(--radius-lg); box-shadow:var(--shadow-lift); margin-bottom:32px;">'
+    : '<div class="icon-circle" style="width:180px; height:180px; margin-bottom:32px;">' + icon('person', 80) + '</div>';
+  const bio = m.bio
+    ? m.bio.split(/\n\s*\n/).map(function (p) { return '<p style="margin-bottom:16px;">' + escapeHTML(p.trim()) + '</p>'; }).join('')
+    : '<p style="margin-bottom:16px;">A full biography for ' + escapeHTML(m.name) + ' is coming soon.</p>';
+  el.innerHTML =
+    '<div class="reveal" style="text-align:center;">' + avatar + '</div>' +
+    '<div class="reveal">' +
+      '<span class="eyebrow"><span class="dot"></span>' + escapeHTML(m.role) + '</span>' +
+      '<h2 style="margin-bottom:22px;">' + escapeHTML(m.name) + '</h2>' +
+      bio +
+    '</div>';
 }
 
 function renderNews() {
   const el = document.getElementById('newsGrid');
   if (!el) return;
   if (!newsItems.length) {
-    el.innerHTML = '<div class="card" style="grid-column:1/-1; text-align:center; padding:50px 30px;"><p style="margin:0;">No news posted yet - check back soon.</p></div>';
+    el.innerHTML = '<div class="card" style="grid-column:1/-1; text-align:center; padding:50px 30px;"><p style="margin:0;">No news posted yet — check back soon.</p></div>';
     return;
   }
   el.innerHTML = newsItems.map(function (n) {
@@ -245,17 +280,63 @@ function renderNews() {
   }).join('');
 }
 
-function renderReports() {
+function reportCardHTML(r) {
+  const img = r.image_url
+    ? '<img src="' + escapeHTML(r.image_url) + '" alt="" style="width:100%; aspect-ratio:4/3; object-fit:cover; border-radius:var(--radius-md) var(--radius-md) 0 0;">'
+    : '<div style="width:100%; aspect-ratio:4/3; background:var(--sky-tint); border-radius:var(--radius-md) var(--radius-md) 0 0; display:flex; align-items:center; justify-content:center; color:var(--muted);">' + icon('doc', 30) + '</div>';
+  const doc = r.file_url
+    ? '<a href="' + escapeHTML(r.file_url) + '" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="margin-top:10px;">Report Document</a>'
+    : '';
+  return '<div class="card" style="padding:0; overflow:hidden; text-align:left;">' + img +
+    '<div style="padding:22px;"><h4 style="margin-bottom:6px;">' + escapeHTML(r.title) + '</h4>' +
+    (r.desc ? '<p>' + escapeHTML(r.desc) + '</p>' : '') + doc + '</div></div>';
+}
+
+function reportYears() {
+  return Array.from(new Set(reports.map(function (r) { return r.year || 'Undated'; }))).sort().reverse();
+}
+
+function renderReports(yearFilter) {
   const el = document.getElementById('reportsGrid');
   if (!el) return;
+
   if (!reports.length) {
-    el.innerHTML = '<div class="card" style="grid-column:1/-1; max-width:520px; margin:0 auto; text-align:center; padding:50px 30px;"><div class="icon-circle" style="margin:0 auto 18px;">' + icon('doc') + '</div><h4 style="margin-bottom:8px;">Reports Coming Soon</h4><p style="margin:0;">Check back here, or contact our office directly to request a copy.</p></div>';
+    el.innerHTML = '<div class="card" style="max-width:520px; margin:0 auto; text-align:center; padding:50px 30px;"><div class="icon-circle" style="margin:0 auto 18px;">' + icon('doc') + '</div><h4 style="margin-bottom:8px;">AGM Photos Coming Soon</h4><p style="margin:0;">Check back here for photos from our Annual General Meetings.</p></div>';
     return;
   }
-  el.innerHTML = reports.map(function (r) {
-    const tag = r.year ? '<span class="tag-soon" style="margin-bottom:14px;">' + escapeHTML(r.year) + '</span>' : '';
-    const desc = r.desc ? '<p>' + escapeHTML(r.desc) + '</p>' : '';
-    return '<div class="card"><div class="icon-circle">' + icon('doc') + '</div>' + tag + '<h4>' + escapeHTML(r.title) + '</h4>' + desc + '</div>';
+
+  if (yearFilter) {
+    const items = reports.filter(function (r) { return String(r.year || 'Undated') === String(yearFilter); });
+    el.innerHTML = !items.length
+      ? '<div class="card" style="max-width:520px; margin:0 auto; text-align:center; padding:50px 30px;"><h4 style="margin-bottom:8px;">No Photos for ' + escapeHTML(yearFilter) + ' Yet</h4><p style="margin:0;">Try another year, or check back soon.</p></div>'
+      : '<div class="grid grid-3">' + items.map(reportCardHTML).join('') + '</div>';
+    return;
+  }
+
+  el.innerHTML = reportYears().map(function (y) {
+    const items = reports.filter(function (r) { return (r.year || 'Undated') === y; });
+    return '<div class="service-group"><h3 class="service-group-title">' + escapeHTML(y) + '</h3><div class="grid grid-3">' + items.map(reportCardHTML).join('') + '</div></div>';
+  }).join('');
+}
+
+function renderReportsYearPills(activeYear) {
+  const el = document.getElementById('reportsYearPills');
+  if (!el) return;
+  const years = reportYears();
+  if (!years.length) { el.innerHTML = ''; return; }
+  const allPill = '<a href="#reports" data-page="reports" class="btn btn-sm ' + (!activeYear ? 'btn-primary' : 'btn-outline') + '">All Years</a>';
+  el.innerHTML = allPill + years.map(function (y) {
+    const isActive = String(activeYear) === String(y);
+    return '<a href="#reports/' + encodeURIComponent(y) + '" data-page="reports" class="btn btn-sm ' + (isActive ? 'btn-primary' : 'btn-outline') + '">' + escapeHTML(y) + '</a>';
+  }).join('');
+}
+
+function populateReportsYearMenu() {
+  const el = document.getElementById('reportsYearMenu');
+  if (!el) return;
+  const years = reportYears();
+  el.innerHTML = '<a href="#reports">All Years</a>' + years.map(function (y) {
+    return '<a href="#reports/' + encodeURIComponent(y) + '">' + escapeHTML(y) + '</a>';
   }).join('');
 }
 
@@ -276,27 +357,52 @@ function renderAll() {
   renderServices();
   renderBoard();
   renderNews();
-  renderReports();
+  populateReportsYearMenu();
   renderForms();
+}
+
+function refreshDynamicContent() {
+  // Re-applies whatever's currently on screen after a background data
+  // refresh, WITHOUT touching scroll position or nav state — a full
+  // showPage()/handleHash() re-run would yank the user back to the top.
+  const activePage = pages.filter(function (p) { return p.classList.contains('active'); })[0];
+  if (!activePage) return;
+  const raw = (window.location.hash || '').slice(1);
+  const slashIdx = raw.indexOf('/');
+  const param = slashIdx === -1 ? null : decodeURIComponent(raw.slice(slashIdx + 1));
+
+  if (activePage.id === 'reports') {
+    renderReports(param);
+    renderReportsYearPills(param);
+  }
+  if (activePage.id === 'board-detail' && param) {
+    const member = boardMembers.find(function (m) { return String(m.id) === String(param); });
+    if (member) renderBoardDetail(member);
+  }
 }
 
 
 // ============================================
-// ROUTER - <a href="#page"> links, filtered by hash
+// ROUTER — <a href="#page"> links, filtered by hash
 // ============================================
 const pages = Array.from(document.querySelectorAll('.page'));
 const navLinks = Array.from(document.querySelectorAll('.nav-link'));
 
-function showPage(id) {
+function showPage(id, param) {
   const exists = pages.some(function (p) { return p.id === id; });
   const target = exists ? id : 'home';
 
-  // Hide everything that isn't the target, show only the target - via filter()
+  // Hide everything that isn't the target, show only the target — via filter()
   pages.filter(function (p) { return p.id !== target; }).forEach(function (p) { p.classList.remove('active'); });
   pages.filter(function (p) { return p.id === target; }).forEach(function (p) { p.classList.add('active'); });
 
   navLinks.forEach(function (l) { l.classList.remove('active'); });
   navLinks.filter(function (l) { return l.dataset.page === target; }).forEach(function (l) { l.classList.add('active'); });
+
+  if (target === 'reports') {
+    renderReports(param || null);
+    renderReportsYearPills(param || null);
+  }
 
   const activePage = pages.filter(function (p) { return p.id === target; })[0];
   const title = activePage ? activePage.dataset.title : 'Home';
@@ -307,9 +413,28 @@ function showPage(id) {
   requestAnimationFrame(observeReveals);
 }
 
+function showBoardDetail(memberId) {
+  const member = boardMembers.find(function (m) { return String(m.id) === String(memberId); });
+  if (!member || !member.name) {
+    showPage('board');
+    return;
+  }
+  renderBoardDetail(member);
+  showPage('board-detail');
+  document.title = member.name + ' | TTCCUL';
+}
+
 function handleHash() {
-  const id = (window.location.hash || '#home').slice(1);
-  showPage(id);
+  const raw = (window.location.hash || '#home').slice(1);
+  const slashIdx = raw.indexOf('/');
+  const id = slashIdx === -1 ? raw : raw.slice(0, slashIdx);
+  const param = slashIdx === -1 ? null : decodeURIComponent(raw.slice(slashIdx + 1));
+
+  if (id === 'board' && param) {
+    showBoardDetail(param);
+    return;
+  }
+  showPage(id, param);
 }
 
 window.addEventListener('hashchange', handleHash);
@@ -362,7 +487,7 @@ function observeReveals() {
 }
 
 // ============================================
-// CONTACT FORM - no backend, opens a prefilled email
+// CONTACT FORM — no backend, opens a prefilled email
 // ============================================
 document.addEventListener('submit', function (e) {
   if (e.target && e.target.id === 'contactForm') {
@@ -372,13 +497,13 @@ document.addEventListener('submit', function (e) {
     const email = form.email.value.trim();
     const message = form.message.value.trim();
     const subject = encodeURIComponent('Website enquiry from ' + name);
-    const body = encodeURIComponent(message + '\n\n- ' + name + ' (' + email + ')');
+    const body = encodeURIComponent(message + '\n\n— ' + name + ' (' + email + ')');
     window.location.href = 'mailto:' + siteContent.contact_email + '?subject=' + subject + '&body=' + body;
   }
 });
 
 // ============================================
-// INIT - render instantly from defaults (zero delay,
+// INIT — render instantly from defaults (zero delay,
 // works identically whether or not Supabase is set up
 // yet), then silently upgrade to live data if available.
 // ============================================
@@ -389,6 +514,7 @@ observeReveals();
 loadContent().then(function (updated) {
   if (updated) {
     renderAll();
+    refreshDynamicContent();
     observeReveals();
   }
 });
