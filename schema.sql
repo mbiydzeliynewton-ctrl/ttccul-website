@@ -79,6 +79,46 @@ create table if not exists public.reports (
 alter table public.reports enable row level security;
 alter table public.reports add column if not exists image_url text;
 
+-- ---------- FAQS ----------
+create table if not exists public.faqs (
+  id uuid primary key default gen_random_uuid(),
+  question text not null,
+  answer text not null,
+  category text not null default 'General',
+  sort_order int not null default 0
+);
+alter table public.faqs enable row level security;
+
+-- ---------- BRANCHES ----------
+create table if not exists public.branches (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  address text,
+  phone text,
+  hours text,
+  is_headquarters boolean not null default false,
+  tags text,
+  photo_url text,
+  sort_order int not null default 0
+);
+alter table public.branches enable row level security;
+
+-- ---------- MEMBERSHIP APPLICATIONS ----------
+-- Public can INSERT (submit an application) but never read/list —
+-- only the admin can view or manage submissions. Different shape
+-- from every other table, so it gets its own policies below.
+create table if not exists public.membership_applications (
+  id uuid primary key default gen_random_uuid(),
+  full_name text not null,
+  phone text not null,
+  email text,
+  account_type text,
+  message text,
+  status text not null default 'new',
+  created_at timestamptz not null default now()
+);
+alter table public.membership_applications enable row level security;
+
 -- ---------- SITE TEXT CONTENT (key/value) ----------
 create table if not exists public.site_content (
   key text primary key,
@@ -93,12 +133,20 @@ alter table public.site_content enable row level security;
 -- authenticated = logged-in admin (read + write)
 -- ============================================================
 grant select on public.services, public.core_values, public.board_members,
-  public.news_items, public.forms, public.reports, public.site_content
+  public.news_items, public.forms, public.reports, public.site_content,
+  public.faqs, public.branches
   to anon, authenticated;
 
 grant insert, update, delete on public.services, public.core_values, public.board_members,
-  public.news_items, public.forms, public.reports, public.site_content
+  public.news_items, public.forms, public.reports, public.site_content,
+  public.faqs, public.branches
   to authenticated;
+
+-- membership_applications is different on purpose: the public can
+-- SUBMIT (insert) an application but can never read the list back —
+-- only the admin can see who has applied.
+grant insert on public.membership_applications to anon, authenticated;
+grant select, update, delete on public.membership_applications to authenticated;
 
 -- ============================================================
 -- RLS POLICIES — row-level "which rows, and who exactly"
@@ -109,7 +157,7 @@ declare
   admin_email text := 'info@ttccul.com';
   t text;
 begin
-  foreach t in array array['services','core_values','board_members','news_items','forms','reports','site_content']
+  foreach t in array array['services','core_values','board_members','news_items','forms','reports','site_content','faqs','branches']
   loop
     execute format('drop policy if exists "public read" on public.%I;', t);
     execute format('create policy "public read" on public.%I for select to anon, authenticated using (true);', t);
@@ -120,6 +168,21 @@ begin
       t, admin_email, admin_email
     );
   end loop;
+end $$;
+
+-- membership_applications: anyone can submit, only the admin can ever read one back.
+do $$
+declare
+  admin_email text := 'info@ttccul.com';
+begin
+  execute 'drop policy if exists "public submit" on public.membership_applications;';
+  execute 'create policy "public submit" on public.membership_applications for insert to anon, authenticated with check (true);';
+
+  execute 'drop policy if exists "admin manage" on public.membership_applications;';
+  execute format(
+    'create policy "admin manage" on public.membership_applications for all to authenticated using ((auth.jwt() ->> ''email'') = %L) with check ((auth.jwt() ->> ''email'') = %L);',
+    admin_email, admin_email
+  );
 end $$;
 
 -- ============================================================
@@ -189,6 +252,22 @@ select * from (values
 ) as v(name, description, sort_order)
 where not exists (select 1 from public.forms);
 
+insert into public.faqs (question, answer, category, sort_order)
+select * from (values
+  ('How do I become a member of TTCCUL?','Visit our office in Tole-Buea or reach out by phone or email, complete a membership application, provide valid identification, and open a shares account. See the Membership page for the full step-by-step process.','Membership',1),
+  ('What savings options does TTCCUL offer?','Shares accounts, savings accounts, deposit accounts, minors accounts, group accounts, and daily savings (Akawo) collection. See the Services page for details on each.','Savings',2),
+  ('What is Akawo?','Akawo is doorstep daily savings collection — a traditional, convenient way to build your savings a little at a time without needing to visit the office every day.','Akawo',3),
+  ('What loans can I apply for?','Personal, business, agricultural and building loans, plus school fees loans, Akawo-linked loans, overdraft facilities and contract financing. Full list on the Services page.','Loans',4),
+  ('Do I need to be a member before applying for a loan?','Yes — loans are a membership benefit. Join first (see the Membership page), then loan products become available to you.','Loans',5)
+) as v(question, answer, category, sort_order)
+where not exists (select 1 from public.faqs);
+
+insert into public.branches (name, address, phone, hours, is_headquarters, tags, sort_order)
+select * from (values
+  ('Tole Main Branch (Headquarters)','Tole, Buea, Southwest Region, Cameroon','675 062 254','Monday – Friday, 8:00 AM – 4:00 PM', true, 'Headquarters, Full Loan Services, Customer Care', 1)
+) as v(name, address, phone, hours, is_headquarters, tags, sort_order)
+where not exists (select 1 from public.branches);
+
 insert into public.site_content (key, value)
 select * from (values
   ('hero_badge','Serving Tole-Buea Since 1970'),
@@ -220,7 +299,19 @@ where not exists (select 1 from public.site_content);
 -- Added later than the block above — its own guard so it still
 -- gets inserted even on databases that already ran the seed once.
 insert into public.site_content (key, value)
-values ('hero_image_url', '')
+values ('hero_image_url', ''), ('hero_video_url', '')
+on conflict (key) do nothing;
+
+insert into public.site_content (key, value)
+select * from (values
+  ('loan_interest_rate_annual', '15'),
+  ('savings_interest_rate_annual', '5'),
+  ('step1_detail', 'Bring a valid ID. No appointment needed — walk-ins are welcome during office hours.'),
+  ('step2_detail', 'Applications are usually reviewed the same week.'),
+  ('step3_detail', 'Bring a national ID card or passport, plus any document we ask for when you apply.'),
+  ('step4_detail', 'Your shares purchase is what officially makes you a part-owner of the union.'),
+  ('step5_detail', 'From here, loan products and every other service become available to you.')
+) as v(key, value)
 on conflict (key) do nothing;
 
 -- ============================================================
@@ -231,7 +322,9 @@ insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_typ
 values
   ('board-photos', 'board-photos', true, 5242880, array['image/png','image/jpeg','image/webp','image/gif']),
   ('forms-files', 'forms-files', true, 10485760, array['application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document']),
-  ('agm-photos', 'agm-photos', true, 8388608, array['image/png','image/jpeg','image/webp','image/gif'])
+  ('agm-photos', 'agm-photos', true, 8388608, array['image/png','image/jpeg','image/webp','image/gif']),
+  ('branch-photos', 'branch-photos', true, 5242880, array['image/png','image/jpeg','image/webp','image/gif']),
+  ('hero-video', 'hero-video', true, 31457280, array['video/mp4','video/webm'])
 on conflict (id) do update set
   public = excluded.public,
   file_size_limit = excluded.file_size_limit,
@@ -242,7 +335,7 @@ declare
   admin_email text := 'info@ttccul.com';
   b text;
 begin
-  foreach b in array array['board-photos','forms-files','agm-photos']
+  foreach b in array array['board-photos','forms-files','agm-photos','branch-photos','hero-video']
   loop
     execute format('drop policy if exists "public read %s" on storage.objects;', b);
     execute format('create policy "public read %s" on storage.objects for select using (bucket_id = %L);', b, b);
