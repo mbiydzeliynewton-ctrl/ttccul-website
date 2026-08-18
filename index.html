@@ -461,9 +461,136 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .step-body { flex: 1; }
 .step-body h4 { margin-bottom: 6px; }
 .step-body p { font-size: 0.92rem; }
-.step-chevron { flex-shrink: 0; color: var(--muted); margin-top: 6px; transition: transform 0.2s ease; }
-.numbered-step-wrap[open] .step-chevron { transform: rotate(180deg); }
-.step-extra { padding: 0 0 24px 70px; margin-top: -8px; color: var(--muted); font-size: 0.88rem; overflow: hidden; transition: height 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+.step-chevron { flex-shrink: 0; color: var(--muted); margin-top: 6px; transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); }
+.numbered-step-wrap.is-open .step-chevron { transform: rotate(180deg); }
+/* .step-extra is the element whose height gets animated by JS — it must carry
+   NO padding of its own (box-sizing:border-box would refuse to collapse below
+   its padding, leaving a visible sliver at height:0). All spacing instead
+   lives on .step-extra-inner, a plain child with no bearing on the animation. */
+.step-extra { overflow: hidden; transition: height 0.38s cubic-bezier(0.16, 1, 0.3, 1); }
+/* height:0 only applies while CLOSED. Once .is-open is added, nothing
+   constrains height any more, so when the open-animation finishes and
+   the script clears the inline height it set, the panel correctly
+   settles at its natural (auto) height instead of snapping back to 0 —
+   that mismatch was the bug causing panels to close right after opening. */
+.numbered-step-wrap:not(.is-open) .step-extra { height: 0; }
+.step-extra-inner { padding: 0 0 24px 70px; margin-top: -8px; color: var(--muted); font-size: 0.88rem; }
+
+/* ============================================
+   PAGE BANNER — shorter sibling of the home hero, used on
+   About / Services / Membership / Branches / Reports / Contact.
+   Shows a branded gradient by default; layers a photo when one
+   is set in site_content, exactly like the home hero does.
+   ============================================ */
+.page-banner { position: relative; overflow: hidden; padding: 150px 0 64px;
+  background: linear-gradient(160deg, var(--ink-navy) 0%, var(--slate-blue) 100%); color: var(--white); }
+.page-banner-media { position: absolute; inset: 0; z-index: 0; display: none; }
+.page-banner.has-banner-img .page-banner-media { display: block; }
+.page-banner-media img { width: 100%; height: 100%; object-fit: cover; }
+.page-banner-overlay { position: absolute; inset: 0;
+  background: linear-gradient(160deg, rgba(15,44,76,0.90) 0%, rgba(29,78,122,0.80) 100%); }
+.page-banner-inner { position: relative; z-index: 1; }
+.page-banner .section-head { margin-bottom: 0; }
+.page-banner .eyebrow { background: rgba(255,255,255,0.14); color: #8FD79A; }
+.page-banner h1, .page-banner h2 { color: var(--white); }
+.page-banner .lead { color: #C7D8E6; }
+.back-link { display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 600;
+  color: #C7D8E6; margin-bottom: 18px; }
+.back-link:hover { color: var(--white); }
+.back-link svg { width: 16px; height: 16px; }
+
+/* ============================================
+   IMAGE-FALLBACK BLOCK — used for About page's Overview /
+   Mission / Vision images: shows a real photo once set,
+   otherwise a themed icon so the layout never looks broken.
+   ============================================ */
+.img-fallback-wrap { position: relative; width: 100%; aspect-ratio: 4 / 3; border-radius: var(--radius-lg);
+  overflow: hidden; background: var(--sky-tint); display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-md); }
+.img-fallback-wrap img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.img-fallback-wrap .fallback-icon { color: var(--slate-blue); opacity: 0.55; }
+.img-fallback-wrap.has-image .fallback-icon { display: none; }
+.about-block { align-items: center; gap: 44px; margin-bottom: 56px; }
+.about-block:last-of-type { margin-bottom: 0; }
+.about-block .about-block-text h3 { margin-bottom: 14px; }
+.about-block .about-block-text p { color: var(--muted); }
+
+/* GM avatar: same element, but round, and can hold a real photo */
+.gm-avatar.has-image { background: none; padding: 0; overflow: hidden; }
+.gm-avatar.has-image img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.gm-avatar img { display: none; }
+.gm-avatar.has-image img { display: block; }
+.gm-avatar.has-image svg { display: none; }
+
+/* ============================================
+   CARD CTA ALIGNMENT — pillar cards & service cards grow to an
+   even height and pin their button to the bottom of the card.
+   ============================================ */
+.pillar-card, .service-card { display: flex; flex-direction: column; }
+.pillar-card .card-cta, .service-card .card-cta { margin-top: 18px; }
+.card-cta { width: 100%; justify-content: center; }
+.pillars-all-services { text-align: center; margin-top: 36px; }
+
+/* ============================================
+   TESTIMONIALS — Members Reviews
+   ============================================ */
+.testimonial-card { display: flex; flex-direction: column; gap: 16px; }
+.testimonial-stars { display: flex; gap: 3px; color: var(--tea-green); }
+.testimonial-stars .star-off { color: var(--line); }
+.testimonial-message { font-size: 0.96rem; color: var(--ink-navy); flex: 1; }
+.testimonial-person { display: flex; align-items: center; gap: 12px; }
+.testimonial-avatar { width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; overflow: hidden;
+  background: var(--sky-tint); display: flex; align-items: center; justify-content: center; color: var(--slate-blue); }
+.testimonial-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.testimonial-name { font-weight: 700; font-size: 0.92rem; }
+.testimonial-role { font-size: 0.8rem; color: var(--muted); }
+
+/* ============================================
+   SOCIAL / QUICK LINKS
+   ============================================ */
+.social-links { display: flex; gap: 10px; margin-top: 18px; }
+.social-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.08); color: var(--white); transition: background 0.2s ease, transform 0.2s ease; flex-shrink: 0; }
+.social-icon:hover { background: var(--tea-green); transform: translateY(-2px); }
+.social-icon svg { width: 18px; height: 18px; }
+
+/* ============================================
+   CONTACT QUICK-ACTION BUTTONS
+   ============================================ */
+.quick-action-btn { display: flex; align-items: center; gap: 10px; width: 100%; justify-content: center; margin-top: 10px; }
+.quick-action-btn:first-of-type { margin-top: 16px; }
+.quick-action-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+/* ============================================
+   TABS — Terms & Conditions / Cookie Policy
+   ============================================ */
+.tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--line); margin-bottom: 32px; flex-wrap: wrap; }
+.tab-btn { padding: 12px 20px; font-weight: 700; font-size: 0.92rem; color: var(--muted); border-bottom: 2px solid transparent;
+  margin-bottom: -1px; transition: color 0.2s ease, border-color 0.2s ease; cursor: pointer; }
+.tab-btn.active { color: var(--tea-green); border-color: var(--tea-green); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+.legal-text { white-space: pre-line; color: var(--muted); font-size: 0.95rem; line-height: 1.8; }
+
+/* ============================================
+   CHECKBOX FIELD — terms agreement on the application form
+   ============================================ */
+.checkbox-field { display: flex; align-items: flex-start; gap: 12px; margin: 18px 0; }
+.checkbox-field input[type="checkbox"] { width: 20px; height: 20px; flex-shrink: 0; margin-top: 2px; accent-color: var(--tea-green); cursor: pointer; }
+.checkbox-field label { font-size: 0.9rem; color: var(--muted); line-height: 1.5; cursor: pointer; }
+.checkbox-field label a { color: var(--tea-green); font-weight: 600; }
+
+/* ============================================
+   COOKIE CONSENT BANNER
+   ============================================ */
+.cookie-banner { position: fixed; left: 0; right: 0; bottom: 0; z-index: 1200; background: var(--ink-navy); color: var(--white);
+  padding: 18px 24px; box-shadow: 0 -10px 30px rgba(0,0,0,0.25); transform: translateY(110%); transition: transform 0.4s cubic-bezier(0.16,1,0.3,1); }
+.cookie-banner.visible { transform: translateY(0); }
+.cookie-banner-inner { max-width: var(--container); margin: 0 auto; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+.cookie-banner p { font-size: 0.86rem; color: #C7D8E6; flex: 1; min-width: 220px; margin: 0; }
+.cookie-banner p a { color: var(--white); text-decoration: underline; }
+.cookie-banner-actions { display: flex; gap: 10px; flex-shrink: 0; }
+body.cookie-banner-visible .wa-fab { bottom: 104px; }
 
 /* ============================================
    RESPONSIVE
@@ -503,6 +630,16 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   .section { padding: 64px 0; }
   .page-top { padding-top: 118px; }
   .pillars { margin-top: -40px; }
+  .page-banner { padding: 118px 0 44px; }
+  .about-block { gap: 24px; margin-bottom: 40px; }
+  .img-fallback-wrap { aspect-ratio: 16 / 10; }
+  .cookie-banner { padding: 16px 20px; }
+  .cookie-banner-inner { flex-direction: column; align-items: stretch; text-align: center; }
+  .cookie-banner-actions { width: 100%; }
+  .cookie-banner-actions .btn { flex: 1; }
+  .tabs { gap: 4px; }
+  .tab-btn { padding: 10px 14px; font-size: 0.86rem; }
+  .social-links { justify-content: center; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
@@ -637,6 +774,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
         </div>
         <h3>Savings &amp; Deposits</h3>
         <p>Shares, savings, deposit and daily Akawo accounts that build the habit of saving.</p>
+        <a href="#membership" class="btn btn-outline btn-sm card-cta" data-page="membership">Open an Account</a>
       </div>
       <div class="pillar-card reveal">
         <div class="icon-circle">
@@ -644,6 +782,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
         </div>
         <h3>Loans &amp; Credit</h3>
         <p>Personal, business, agricultural and building loans at fair, member-first rates.</p>
+        <a href="#membership" class="btn btn-outline btn-sm card-cta" data-page="membership">Open an Account</a>
       </div>
       <div class="pillar-card reveal">
         <div class="icon-circle">
@@ -651,7 +790,14 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
         </div>
         <h3>Other Services</h3>
         <p>MOMO, Western Union, cheque clearing, payroll, insurance and business counselling.</p>
+        <a href="#membership" class="btn btn-outline btn-sm card-cta" data-page="membership">Open an Account</a>
       </div>
+    </div>
+    <div class="pillars-all-services">
+      <a href="#services" class="btn btn-primary" data-page="services">
+        All Services
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
     </div>
   </div>
 
@@ -692,6 +838,17 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
     </div>
   </div>
 
+  <div class="section">
+    <div class="container">
+      <div class="section-head reveal" style="text-align:center; margin-left:auto; margin-right:auto;">
+        <span class="eyebrow"><span class="dot"></span>Members Reviews</span>
+        <h2>What Our Members Say</h2>
+        <p class="lead">Real experiences from the people who save, borrow and grow with us.</p>
+      </div>
+      <div class="grid grid-3 reveal" id="testimonialsGrid"></div>
+    </div>
+  </div>
+
   <div class="section-alt pre-footer-gap">
     <div class="container">
       <div class="banner-cta reveal">
@@ -712,36 +869,65 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
      PAGE: ABOUT
      ============================================ -->
 <section class="page" id="about" data-title="About Us">
-  <div class="section page-top">
-    <div class="container">
-      <div class="section-head reveal">
+  <div class="page-banner" id="aboutBanner">
+    <div class="page-banner-media">
+      <img id="aboutBannerImg" alt="" hidden>
+      <div class="page-banner-overlay"></div>
+    </div>
+    <div class="container page-banner-inner">
+      <div class="section-head">
         <span class="eyebrow"><span class="dot"></span>About Us</span>
         <h2>Rooted in Tole, Built for Every Member</h2>
         <p class="lead">Tole Tea Cooperative Credit Union Ltd (TTCCUL) is a member-owned financial institution founded in 1970 to provide savings and loan services to its members.</p>
       </div>
+    </div>
+  </div>
 
-      <div class="grid grid-2" style="gap:60px; align-items:start; margin-bottom:80px;">
-        <div class="reveal" id="aboutOverview" data-content="about_overview">
-          <p style="margin-bottom:16px;">As a microfinance institution, we promote financial inclusion by offering affordable financial services — especially to low- and middle-income individuals with limited access to commercial banks.</p>
-          <p style="margin-bottom:16px;">We mobilize savings from our members and use these funds to grant loans at fair, relatively low interest rates. TTCCUL operates on the principle of mutual assistance and democratic control: every member holds equal voting rights, regardless of the amount they've saved.</p>
-          <p>By encouraging saving habits and providing accessible credit, we contribute to poverty reduction, entrepreneurship development, and improved living standards across the communities we serve.</p>
+  <div class="section">
+    <div class="container">
+
+      <div class="grid grid-2 about-block reveal">
+        <div class="img-fallback-wrap">
+          <img id="aboutOverviewImg" alt="TTCCUL members and office" hidden>
+          <span class="fallback-icon"><svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.5 3-6 7-6s7 2.5 7 6"/><circle cx="17" cy="8" r="2.4"/><path d="M17.5 14.2c2.6.5 4.5 2.7 4.5 5.8"/></svg></span>
         </div>
-        <div class="reveal" style="display:flex; flex-direction:column; gap:20px;">
-          <div class="card" style="display:flex; gap:18px; align-items:flex-start;">
-            <div class="icon-circle" style="flex-shrink:0;">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 7v6c0 5 4 9 9 9s9-4 9-9V7l-9-5Z"/></svg>
-            </div>
-            <div><h4>Our Mission</h4><p data-content="mission_text">To continuously develop and sustain a secure, law-abiding cooperative credit union that provides quick and reliable financial services to our members for their financial and social development — while paying a fair rate of interest on their savings.</p></div>
-          </div>
-          <div class="card" style="display:flex; gap:18px; align-items:flex-start;">
-            <div class="icon-circle" style="flex-shrink:0;">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a13 13 0 0 1 0 18M12 3a13 13 0 0 0 0 18"/></svg>
-            </div>
-            <div><h4>Our Vision</h4><p data-content="vision_text">To become a one-stop-shop financial institution, offering every product and service found at other microfinance institutions — delivering digital, accessible financial inclusion to our members at competitive rates.</p></div>
+        <div class="about-block-text">
+          <h3>Who We Are</h3>
+          <div id="aboutOverview" data-content="about_overview">
+            <p style="margin-bottom:16px;">As a microfinance institution, we promote financial inclusion by offering affordable financial services — especially to low- and middle-income individuals with limited access to commercial banks.</p>
+            <p style="margin-bottom:16px;">We mobilize savings from our members and use these funds to grant loans at fair, relatively low interest rates. TTCCUL operates on the principle of mutual assistance and democratic control: every member holds equal voting rights, regardless of the amount they've saved.</p>
+            <p>By encouraging saving habits and providing accessible credit, we contribute to poverty reduction, entrepreneurship development, and improved living standards across the communities we serve.</p>
           </div>
         </div>
       </div>
 
+      <div class="grid grid-2 about-block reveal">
+        <div class="img-fallback-wrap">
+          <img id="missionImg" alt="TTCCUL mission" hidden>
+          <span class="fallback-icon"><svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 7v6c0 5 4 9 9 9s9-4 9-9V7l-9-5Z"/></svg></span>
+        </div>
+        <div class="about-block-text">
+          <h3>Our Mission</h3>
+          <p data-content="mission_text">To continuously develop and sustain a secure, law-abiding cooperative credit union that provides quick and reliable financial services to our members for their financial and social development — while paying a fair rate of interest on their savings.</p>
+        </div>
+      </div>
+
+      <div class="grid grid-2 about-block reveal" style="margin-bottom:0;">
+        <div class="img-fallback-wrap">
+          <img id="visionImg" alt="TTCCUL vision" hidden>
+          <span class="fallback-icon"><svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a13 13 0 0 1 0 18M12 3a13 13 0 0 0 0 18"/></svg></span>
+        </div>
+        <div class="about-block-text">
+          <h3>Our Vision</h3>
+          <p data-content="vision_text">To become a one-stop-shop financial institution, offering every product and service found at other microfinance institutions — delivering digital, accessible financial inclusion to our members at competitive rates.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section" style="padding-top:0;">
+    <div class="container">
       <div class="section-head reveal">
         <span class="eyebrow"><span class="dot"></span>What Guides Us</span>
         <h2>Our Core Values</h2>
@@ -753,7 +939,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
   <div class="section-alt">
     <div class="container">
       <div class="gm-quote reveal">
-        <div class="gm-avatar">
+        <div class="gm-avatar" id="gmAvatar">
+          <img id="gmPhotoImg" alt="General Manager" hidden>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
         </div>
         <div>
@@ -783,56 +970,36 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
      PAGE: SERVICES
      ============================================ -->
 <section class="page" id="services" data-title="Our Services">
-  <div class="section page-top">
-    <div class="container">
-      <div class="section-head reveal">
+  <div class="page-banner" id="servicesBanner">
+    <div class="page-banner-media">
+      <img id="servicesBannerImg" alt="" hidden>
+      <div class="page-banner-overlay"></div>
+    </div>
+    <div class="container page-banner-inner">
+      <div class="section-head">
         <span class="eyebrow"><span class="dot"></span>Our Services</span>
         <h2>Financial Services Built Around Your Life</h2>
         <p class="lead">From your first savings account to financing a container clearance, TTCCUL offers a full range of products designed for real, everyday needs.</p>
       </div>
-      <div id="servicesContent"></div>
     </div>
   </div>
 
   <div class="section">
     <div class="container">
-      <div class="card reveal" style="padding:36px; max-width:640px; margin:0 auto;">
-        <span class="eyebrow"><span class="dot"></span>Financial Simulator</span>
-        <h3 style="margin-bottom:8px;">Calculate Your Repayments or Savings Growth</h3>
-        <p style="margin-bottom:24px; font-size:0.9rem;">Simulate your numbers before you apply.</p>
+      <div id="servicesContent"></div>
+    </div>
+  </div>
 
-        <div style="display:flex; gap:8px; margin-bottom:26px;">
-          <button type="button" class="btn btn-primary btn-sm" id="calcModeLoanBtn" style="flex:1; justify-content:center;">Loan Repayment</button>
-          <button type="button" class="btn btn-outline btn-sm" id="calcModeSavingsBtn" style="flex:1; justify-content:center;">Savings Growth</button>
-        </div>
-
-        <div id="calcLoanPanel">
-          <div class="form-field">
-            <label>Principal Loan Amount: <strong id="calcLoanAmountLabel">500,000 FCFA</strong></label>
-            <input type="range" id="calcLoanAmount" min="100000" max="10000000" step="50000" value="500000" style="width:100%;">
-          </div>
-          <div class="form-field">
-            <label>Repayment Period: <strong id="calcLoanTermLabel">24 Months</strong></label>
-            <input type="range" id="calcLoanTerm" min="3" max="60" step="1" value="24" style="width:100%;">
-          </div>
-        </div>
-
-        <div id="calcSavingsPanel" hidden>
-          <div class="form-field">
-            <label>Monthly Contribution: <strong id="calcSavingsAmountLabel">20,000 FCFA</strong></label>
-            <input type="range" id="calcSavingsAmount" min="2000" max="500000" step="1000" value="20000" style="width:100%;">
-          </div>
-          <div class="form-field">
-            <label>Savings Period: <strong id="calcSavingsTermLabel">24 Months</strong></label>
-            <input type="range" id="calcSavingsTerm" min="3" max="60" step="1" value="24" style="width:100%;">
-          </div>
-        </div>
-
-        <p class="form-hint" style="margin-bottom:24px;">* Rates shown are illustrative estimates. Final terms depend on account type and approval — contact us for your exact rate.</p>
-
-        <div style="background:var(--ink-navy); border-radius:var(--radius-md); padding:26px; color:var(--white);">
-          <div id="calcOutput"></div>
-        </div>
+  <div class="section" style="padding-top:0;">
+    <div class="container">
+      <div class="card reveal" style="padding:36px; max-width:640px; margin:0 auto; text-align:center;">
+        <div class="icon-circle" style="margin:0 auto 18px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 19h.01M12 19h.01M16 19h.01"/></svg></div>
+        <h3 style="margin-bottom:8px;">Loan &amp; Savings Calculator</h3>
+        <p style="margin-bottom:24px; font-size:0.9rem;">Estimate your monthly repayments on a loan, or see how your savings could grow over time.</p>
+        <a href="#calculator" class="btn btn-primary" data-page="calculator">
+          Open the Calculator
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
       </div>
     </div>
   </div>
@@ -856,13 +1023,22 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
      PAGE: MEMBERSHIP
      ============================================ -->
 <section class="page" id="membership" data-title="Membership">
-  <div class="section page-top">
-    <div class="container">
-      <div class="section-head reveal">
+  <div class="page-banner" id="membershipBanner">
+    <div class="page-banner-media">
+      <img id="membershipBannerImg" alt="" hidden>
+      <div class="page-banner-overlay"></div>
+    </div>
+    <div class="container page-banner-inner">
+      <div class="section-head">
         <span class="eyebrow"><span class="dot"></span>Membership</span>
         <h2>Ownership, Not Just an Account</h2>
         <p class="lead">Joining TTCCUL makes you a part-owner of the union, with an equal vote in how it's run — no matter how much you save.</p>
       </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="container">
 
       <div class="grid grid-4 reveal" style="margin-bottom:80px;">
         <div class="card">
@@ -899,7 +1075,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
             <div class="step-body"><h4>Visit or Reach Out</h4><p>Come to our office in Tole-Buea, or contact us by phone or email to start the conversation.</p></div>
             <svg class="step-chevron" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
           </summary>
-          <div class="step-extra" data-content="step1_detail">Bring a valid ID. No appointment needed — walk-ins are welcome during office hours.</div>
+          <div class="step-extra"><div class="step-extra-inner" data-content="step1_detail">Bring a valid ID. No appointment needed — walk-ins are welcome during office hours.</div></div>
         </details>
         <details class="numbered-step-wrap">
           <summary class="numbered-step">
@@ -907,7 +1083,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
             <div class="step-body"><h4>Complete an Application</h4><p>Fill out a simple membership application form with your basic details.</p></div>
             <svg class="step-chevron" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
           </summary>
-          <div class="step-extra" data-content="step2_detail">Applications are usually reviewed the same week.</div>
+          <div class="step-extra"><div class="step-extra-inner" data-content="step2_detail">Applications are usually reviewed the same week.</div></div>
         </details>
         <details class="numbered-step-wrap">
           <summary class="numbered-step">
@@ -915,7 +1091,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
             <div class="step-body"><h4>Provide Identification</h4><p>Bring a valid form of ID and any supporting documents we request.</p></div>
             <svg class="step-chevron" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
           </summary>
-          <div class="step-extra" data-content="step3_detail">Bring a national ID card or passport, plus any document we ask for when you apply.</div>
+          <div class="step-extra"><div class="step-extra-inner" data-content="step3_detail">Bring a national ID card or passport, plus any document we ask for when you apply.</div></div>
         </details>
         <details class="numbered-step-wrap">
           <summary class="numbered-step">
@@ -923,7 +1099,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
             <div class="step-body"><h4>Open a Shares Account</h4><p>Your shares account is what makes you a member and part-owner of the union.</p></div>
             <svg class="step-chevron" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
           </summary>
-          <div class="step-extra" data-content="step4_detail">Your shares purchase is what officially makes you a part-owner of the union.</div>
+          <div class="step-extra"><div class="step-extra-inner" data-content="step4_detail">Your shares purchase is what officially makes you a part-owner of the union.</div></div>
         </details>
         <details class="numbered-step-wrap">
           <summary class="numbered-step">
@@ -931,7 +1107,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
             <div class="step-body"><h4>Start Saving &amp; Borrowing</h4><p>Begin building your savings, and unlock access to our loan products as a full member.</p></div>
             <svg class="step-chevron" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
           </summary>
-          <div class="step-extra" data-content="step5_detail">From here, loan products and every other service become available to you.</div>
+          <div class="step-extra"><div class="step-extra-inner" data-content="step5_detail">From here, loan products and every other service become available to you.</div></div>
         </details>
       </div>
     </div>
@@ -939,31 +1115,18 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 
   <div class="section">
     <div class="container" style="max-width:640px;">
-      <div class="section-head center reveal" style="margin:0 auto 36px;">
-        <span class="eyebrow"><span class="dot"></span>Open an Account</span>
-        <h2>Start Your Application</h2>
-        <p class="lead">Fill this in and our team will follow up to complete your registration — no need to start from scratch when you visit.</p>
-      </div>
-      <form id="applicationForm" class="card reveal" style="padding:36px;">
-        <div class="form-field"><label for="app-name">Full Name</label><input id="app-name" name="full_name" type="text" required></div>
-        <div class="form-field"><label for="app-phone">Phone Number</label><input id="app-phone" name="phone" type="tel" required></div>
-        <div class="form-field"><label for="app-email">Email (optional)</label><input id="app-email" name="email" type="email"></div>
-        <div class="form-field">
-          <label for="app-type">Account Type</label>
-          <select id="app-type" name="account_type">
-            <option value="shares">Shares Account</option>
-            <option value="savings">Savings Account</option>
-            <option value="deposit">Deposit Account</option>
-            <option value="group">Group Account</option>
-            <option value="minors">Minors Account</option>
-          </select>
+      <div class="card reveal" style="padding:44px; text-align:center;">
+        <div class="icon-circle" style="margin:0 auto 18px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M9 13h6M9 17h6M9 9h1"/></svg>
         </div>
-        <div class="form-field"><label for="app-message">Anything else we should know? (optional)</label><textarea id="app-message" name="message"></textarea></div>
-        <p id="applicationStatus" class="form-hint"></p>
-        <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Submit Application
+        <span class="eyebrow" style="margin:0 auto 14px; display:inline-flex;"><span class="dot"></span>Open an Account</span>
+        <h2 style="margin-bottom:12px;">Start Your Application</h2>
+        <p class="lead" style="margin-bottom:28px;">Fill this in and our team will follow up to complete your registration — no need to start from scratch when you visit.</p>
+        <a href="#apply" class="btn btn-primary" data-page="apply" style="width:100%; justify-content:center;">
+          Start Your Application
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </button>
-      </form>
+        </a>
+      </div>
     </div>
   </div>
 
@@ -986,13 +1149,21 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
      PAGE: BRANCHES
      ============================================ -->
 <section class="page" id="branches" data-title="Branches">
-  <div class="section page-top">
-    <div class="container">
-      <div class="section-head reveal">
+  <div class="page-banner" id="branchesBanner">
+    <div class="page-banner-media">
+      <img id="branchesBannerImg" alt="" hidden>
+      <div class="page-banner-overlay"></div>
+    </div>
+    <div class="container page-banner-inner">
+      <div class="section-head">
         <span class="eyebrow"><span class="dot"></span>Our Network</span>
         <h2>Find a Branch Near You</h2>
         <p class="lead">Visit any of our branch offices — details below.</p>
       </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="container">
       <div class="grid grid-3 reveal" id="branchesGrid"></div>
     </div>
   </div>
@@ -1002,13 +1173,22 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
      PAGE: CONTACT
      ============================================ -->
 <section class="page" id="contact" data-title="Contact Us">
-  <div class="section page-top">
-    <div class="container">
-      <div class="section-head center reveal" style="margin-left:auto; margin-right:auto;">
+  <div class="page-banner" id="contactBanner">
+    <div class="page-banner-media">
+      <img id="contactBannerImg" alt="" hidden>
+      <div class="page-banner-overlay"></div>
+    </div>
+    <div class="container page-banner-inner">
+      <div class="section-head center" style="margin-left:auto; margin-right:auto;">
         <span class="eyebrow"><span class="dot"></span>Contact Us</span>
         <h2>We'd Love to Hear From You</h2>
         <p class="lead">Visit our office, call, or send a message — whichever is easiest for you.</p>
       </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="container">
 
       <div class="grid grid-3 reveal" style="margin-bottom:60px;">
         <div class="card" style="text-align:center;">
@@ -1020,11 +1200,23 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
           <div class="icon-circle" style="margin:0 auto 18px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 3a2 2 0 0 1-.4 2.1L8 10.2a16 16 0 0 0 6 6l1.4-1.4a2 2 0 0 1 2.1-.4c1 .4 2 .6 3 .7a2 2 0 0 1 1.7 2Z"/></svg></div>
           <h4>Call Us</h4>
           <p><span data-content="contact_phone_1">675 062 254</span><br><span data-content="contact_phone_2">674 227 692</span></p>
+          <a href="tel:+237675062254" id="callPhone1Link" class="btn btn-outline btn-sm quick-action-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 3a2 2 0 0 1-.4 2.1L8 10.2a16 16 0 0 0 6 6l1.4-1.4a2 2 0 0 1 2.1-.4c1 .4 2 .6 3 .7a2 2 0 0 1 1.7 2Z"/></svg>
+            Call <span data-content="contact_phone_1">675 062 254</span>
+          </a>
+          <a href="tel:+237674227692" id="callPhone2Link" class="btn btn-outline btn-sm quick-action-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 3a2 2 0 0 1-.4 2.1L8 10.2a16 16 0 0 0 6 6l1.4-1.4a2 2 0 0 1 2.1-.4c1 .4 2 .6 3 .7a2 2 0 0 1 1.7 2Z"/></svg>
+            Call <span data-content="contact_phone_2">674 227 692</span>
+          </a>
         </div>
         <div class="card" style="text-align:center;">
           <div class="icon-circle" style="margin:0 auto 18px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 6-10 7L2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg></div>
           <h4>Email Us</h4>
           <p data-content="contact_email">info@ttccul.com</p>
+          <a href="mailto:info@ttccul.com" id="emailUsLink" class="btn btn-outline btn-sm quick-action-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 6-10 7L2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg>
+            Email Us
+          </a>
         </div>
       </div>
 
@@ -1124,13 +1316,21 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
      PAGE: REPORTS
      ============================================ -->
 <section class="page" id="reports" data-title="Annual Reports">
-  <div class="section page-top">
-    <div class="container">
-      <div class="section-head reveal">
+  <div class="page-banner" id="reportsBanner">
+    <div class="page-banner-media">
+      <img id="reportsBannerImg" alt="" hidden>
+      <div class="page-banner-overlay"></div>
+    </div>
+    <div class="container page-banner-inner">
+      <div class="section-head">
         <span class="eyebrow"><span class="dot"></span>Transparency</span>
         <h2>Annual Reports</h2>
         <p class="lead">Our annual reports will be published here as they become available, in keeping with our commitment to transparency with every member.</p>
       </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="container">
       <div class="reveal" id="reportsYearPills" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:28px;"></div>
       <div class="reveal" id="reportsGrid"></div>
     </div>
@@ -1149,6 +1349,130 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
         <p class="lead">Digital downloads are on the way. In the meantime, every form below is available at our Tole-Buea office.</p>
       </div>
       <div class="grid grid-2 reveal" id="formsGrid"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     PAGE: APPLY (membership application form,
+     reached via the "Start Your Application" button)
+     ============================================ -->
+<section class="page" id="apply" data-title="Membership Application">
+  <div class="section page-top">
+    <div class="container" style="max-width:640px;">
+      <a href="#membership" data-page="membership" class="btn btn-outline btn-sm" style="margin-bottom:32px;">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+        Back to Membership
+      </a>
+      <div class="section-head reveal" style="margin-bottom:32px;">
+        <span class="eyebrow"><span class="dot"></span>Open an Account</span>
+        <h2>Start Your Application</h2>
+        <p class="lead">Fill this in and our team will follow up to complete your registration — no need to start from scratch when you visit.</p>
+      </div>
+      <form id="applicationForm" class="card reveal" style="padding:36px;">
+        <div class="form-field"><label for="app-name">Full Name</label><input id="app-name" name="full_name" type="text" required></div>
+        <div class="form-field"><label for="app-phone">Phone Number</label><input id="app-phone" name="phone" type="tel" required></div>
+        <div class="form-field"><label for="app-email">Email (optional)</label><input id="app-email" name="email" type="email"></div>
+        <div class="form-field">
+          <label for="app-type">Account Type</label>
+          <select id="app-type" name="account_type">
+            <option value="shares">Shares Account</option>
+            <option value="savings">Savings Account</option>
+            <option value="deposit">Deposit Account</option>
+            <option value="group">Group Account</option>
+            <option value="minors">Minors Account</option>
+          </select>
+        </div>
+        <div class="form-field"><label for="app-message">Anything else we should know? (optional)</label><textarea id="app-message" name="message"></textarea></div>
+        <div class="checkbox-field">
+          <input type="checkbox" id="app-terms" name="terms_accepted" required>
+          <label for="app-terms">I agree to the <a href="#terms" data-page="terms">Terms and Conditions</a> and <a href="#terms/cookies" data-page="terms">Cookie Policy</a>.</label>
+        </div>
+        <p id="applicationStatus" class="form-hint"></p>
+        <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Submit Application
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     PAGE: CALCULATOR (relocated from the Services
+     page — same markup and IDs, just its own page now)
+     ============================================ -->
+<section class="page" id="calculator" data-title="Loan &amp; Savings Calculator">
+  <div class="section page-top">
+    <div class="container" style="max-width:640px;">
+      <a href="#services" data-page="services" class="btn btn-outline btn-sm" style="margin-bottom:32px;">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+        Back to Services
+      </a>
+      <div class="card reveal" style="padding:36px;">
+        <span class="eyebrow"><span class="dot"></span>Financial Simulator</span>
+        <h3 style="margin-bottom:8px;">Calculate Your Repayments or Savings Growth</h3>
+        <p style="margin-bottom:24px; font-size:0.9rem;">Simulate your numbers before you apply.</p>
+
+        <div style="display:flex; gap:8px; margin-bottom:26px;">
+          <button type="button" class="btn btn-primary btn-sm" id="calcModeLoanBtn" style="flex:1; justify-content:center;">Loan Repayment</button>
+          <button type="button" class="btn btn-outline btn-sm" id="calcModeSavingsBtn" style="flex:1; justify-content:center;">Savings Growth</button>
+        </div>
+
+        <div id="calcLoanPanel">
+          <div class="form-field">
+            <label>Principal Loan Amount: <strong id="calcLoanAmountLabel">500,000 FCFA</strong></label>
+            <input type="range" id="calcLoanAmount" min="100000" max="10000000" step="50000" value="500000" style="width:100%;">
+          </div>
+          <div class="form-field">
+            <label>Repayment Period: <strong id="calcLoanTermLabel">24 Months</strong></label>
+            <input type="range" id="calcLoanTerm" min="3" max="60" step="1" value="24" style="width:100%;">
+          </div>
+        </div>
+
+        <div id="calcSavingsPanel" hidden>
+          <div class="form-field">
+            <label>Monthly Contribution: <strong id="calcSavingsAmountLabel">20,000 FCFA</strong></label>
+            <input type="range" id="calcSavingsAmount" min="2000" max="500000" step="1000" value="20000" style="width:100%;">
+          </div>
+          <div class="form-field">
+            <label>Savings Period: <strong id="calcSavingsTermLabel">24 Months</strong></label>
+            <input type="range" id="calcSavingsTerm" min="3" max="60" step="1" value="24" style="width:100%;">
+          </div>
+        </div>
+
+        <p class="form-hint" style="margin-bottom:24px;">* Rates shown are illustrative estimates. Final terms depend on account type and approval — contact us for your exact rate.</p>
+
+        <div style="background:var(--ink-navy); border-radius:var(--radius-md); padding:26px; color:var(--white);">
+          <div id="calcOutput"></div>
+        </div>
+      </div>
+      <div style="text-align:center; margin-top:24px;">
+        <a href="#membership" data-page="membership" class="btn btn-outline">Ready to Open an Account?</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================
+     PAGE: TERMS & CONDITIONS / COOKIE POLICY
+     ============================================ -->
+<section class="page" id="terms" data-title="Terms &amp; Conditions">
+  <div class="section page-top">
+    <div class="container" style="max-width:760px;">
+      <div class="section-head reveal">
+        <span class="eyebrow"><span class="dot"></span>Legal</span>
+        <h2>Terms &amp; Cookie Policy</h2>
+      </div>
+      <div class="tabs reveal">
+        <button type="button" class="tab-btn active" id="termsTabBtn" data-tab="terms">Terms &amp; Conditions</button>
+        <button type="button" class="tab-btn" id="cookiesTabBtn" data-tab="cookies">Cookie Policy</button>
+      </div>
+      <div class="tab-panel active" id="termsTabPanel">
+        <div class="legal-text" id="termsText" data-content="terms_conditions_text">Welcome to the Tole Tea Cooperative Credit Union Ltd (TTCCUL) website. By accessing or using this website, you agree to be bound by the following terms and conditions.</div>
+      </div>
+      <div class="tab-panel" id="cookiesTabPanel">
+        <div class="legal-text" id="cookiesText" data-content="cookies_policy_text">This Cookie Policy explains how Tole Tea Cooperative Credit Union Ltd (TTCCUL) uses cookies and similar technologies on this website.</div>
+      </div>
     </div>
   </div>
 </section>
@@ -1174,6 +1498,20 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
           <span class="brand-name">TTCCUL<small>Tole Tea Credit Union</small></span>
         </a>
         <p>A member-owned cooperative credit union serving Tole-Buea since 1970 — savings, loans and financial inclusion for every member.</p>
+        <div class="social-links">
+          <a href="" id="socialFacebook" class="social-icon" aria-label="Facebook" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3H8a5 5 0 0 0-5 5v8a5 5 0 0 0 5 5h4v-7H9.5v-3H12V9.3A3.3 3.3 0 0 1 15.3 6H18v3h-2.2c-.7 0-1.3.6-1.3 1.3V11h3.3l-.5 3H14.5v7H16a5 5 0 0 0 5-5V8a5 5 0 0 0-5-5Z"/></svg>
+          </a>
+          <a href="" id="socialInstagram" class="social-icon" aria-label="Instagram" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="0.7" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <a href="" id="socialTwitter" class="social-icon" aria-label="X (Twitter)" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 4.5l15 15M19.5 4.5l-15 15"/></svg>
+          </a>
+          <a href="" id="socialLinkedin" class="social-icon" aria-label="LinkedIn" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="7.3" cy="7.3" r="0.9" fill="currentColor" stroke="none"/><path d="M7.3 11v6.5M11.5 17.5V13a2.3 2.3 0 0 1 4.6 0v4.5M11.5 11v.3"/></svg>
+          </a>
+        </div>
       </div>
       <div class="footer-col">
         <h4>Quick Links</h4>
@@ -1191,6 +1529,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
           <li><a href="#news" data-page="news">News &amp; Updates</a></li>
           <li><a href="#reports" data-page="reports">Annual Reports</a></li>
           <li><a href="#forms" data-page="forms">Downloadable Forms</a></li>
+          <li><a href="#terms" data-page="terms">Terms &amp; Conditions</a></li>
+          <li><a href="#terms/cookies" data-page="terms">Cookie Policy</a></li>
         </ul>
       </div>
       <div class="footer-col">
@@ -1212,6 +1552,16 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 <a href="https://wa.me/237675062254" data-content-href="whatsapp_number" target="_blank" rel="noopener" class="wa-fab" aria-label="Chat with us on WhatsApp">
   <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2Zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8 8 0 1 1 12 20Zm4.4-5.9c-.2-.1-1.4-.7-1.7-.8-.2-.1-.4-.1-.6.1s-.6.8-.8 1c-.1.2-.3.2-.5.1-.2-.1-1-.4-2-1.2-.7-.6-1.2-1.4-1.4-1.6-.1-.2 0-.4.1-.5l.4-.4c.1-.1.2-.3.2-.4.1-.2 0-.3 0-.4l-.7-1.7c-.2-.4-.4-.4-.6-.4h-.5c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 2s.9 2.3 1 2.4c.1.2 1.7 2.6 4.1 3.6.6.2 1 .4 1.4.5.6.2 1.1.1 1.5.1.5-.1 1.4-.6 1.6-1.1.2-.5.2-1 .1-1.1-.1-.1-.2-.2-.4-.3Z"/></svg>
 </a>
+
+<div class="cookie-banner" id="cookieBanner">
+  <div class="cookie-banner-inner">
+    <p>We use a small number of cookies to keep this site working well and to remember your preferences. See our <a href="#terms/cookies" data-page="terms" id="cookieBannerLink">Cookie Policy</a> for details.</p>
+    <div class="cookie-banner-actions">
+      <button type="button" class="btn btn-outline btn-sm" id="cookieDeclineBtn" style="color:var(--white); border-color:rgba(255,255,255,0.3);">Decline</button>
+      <button type="button" class="btn btn-primary btn-sm" id="cookieAcceptBtn">Accept</button>
+    </div>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -1308,6 +1658,12 @@ const branches = [
   { name: "Tole Main Branch (Headquarters)", address: "Tole, Buea, Southwest Region, Cameroon", phone: "675 062 254", hours: "Monday – Friday, 8:00 AM – 4:00 PM", is_headquarters: true, tags: "Headquarters, Full Loan Services, Customer Care", photo_url: null }
 ];
 
+const testimonials = [
+  { name: "Akoson E.", role: "Member since 2016", message: "TTCCUL helped me open my first business loan when no bank in town would look at me twice. Fair rates and people who actually know your name.", rating: 5, photo_url: null },
+  { name: "Divine N.", role: "Member since 2019", message: "The Akawo daily savings collection changed how I save. Small amounts every day added up faster than I expected, and the staff make it easy.", rating: 5, photo_url: null },
+  { name: "Grace M.", role: "Member since 2012", message: "One member, one vote actually means something here. I've watched this union grow for over a decade and it still feels like it belongs to us.", rating: 5, photo_url: null }
+];
+
 const downloadForms = [
   { name: "Membership Application Form", desc: "Start your journey to becoming a TTCCUL member.", file_url: null },
   { name: "Account Opening Form", desc: "Open a savings, deposit or shares account.", file_url: null },
@@ -1343,7 +1699,23 @@ const siteContent = {
   step2_detail: "Applications are usually reviewed the same week.",
   step3_detail: "Bring a national ID card or passport, plus any document we ask for when you apply.",
   step4_detail: "Your shares purchase is what officially makes you a part-owner of the union.",
-  step5_detail: "From here, loan products and every other service become available to you."
+  step5_detail: "From here, loan products and every other service become available to you.",
+  about_hero_image_url: "",
+  services_hero_image_url: "",
+  membership_hero_image_url: "",
+  branches_hero_image_url: "",
+  reports_hero_image_url: "",
+  contact_hero_image_url: "",
+  about_image_url: "",
+  mission_image_url: "",
+  vision_image_url: "",
+  gm_photo_url: "",
+  social_facebook_url: "",
+  social_instagram_url: "",
+  social_twitter_url: "",
+  social_linkedin_url: "",
+  terms_conditions_text: "Welcome to the Tole Tea Cooperative Credit Union Ltd (TTCCUL) website. By accessing or using this website, you agree to be bound by the following terms and conditions. Please read them carefully before proceeding.",
+  cookies_policy_text: "This Cookie Policy explains how Tole Tea Cooperative Credit Union Ltd (TTCCUL) uses cookies and similar technologies on this website."
 };
 
 // ============================================
@@ -1365,7 +1737,13 @@ const icons = {
   phone: '<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 3a2 2 0 0 1-.4 2.1L8 10.2a16 16 0 0 0 6 6l1.4-1.4a2 2 0 0 1 2.1-.4c1 .4 2 .6 3 .7a2 2 0 0 1 1.7 2Z"/>',
   mail: '<path d="m22 6-10 7L2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/>',
   arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
-  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>'
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>',
+  star: '<path d="M12 2.5 14.6 8.6 21.3 9.3 16.3 13.7 17.8 20.3 12 16.8 6.2 20.3 7.7 13.7 2.7 9.3 9.4 8.6 12 2.5Z"/>',
+  facebook: '<path d="M17 3H8a5 5 0 0 0-5 5v8a5 5 0 0 0 5 5h4v-7H9.5v-3H12V9.3A3.3 3.3 0 0 1 15.3 6H18v3h-2.2c-.7 0-1.3.6-1.3 1.3V11h3.3l-.5 3H14.5v7H16a5 5 0 0 0 5-5V8a5 5 0 0 0-5-5Z"/>',
+  instagram: '<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r="0.7" fill="currentColor" stroke="none"/>',
+  twitter: '<path d="M4.5 4.5l15 15M19.5 4.5l-15 15"/>',
+  linkedin: '<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="7.3" cy="7.3" r="0.9" fill="currentColor" stroke="none"/><path d="M7.3 11v6.5M11.5 17.5V13a2.3 2.3 0 0 1 4.6 0v4.5M11.5 11v.3"/>',
+  calc: '<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 19h.01M12 19h.01M16 19h.01"/>'
 };
 function icon(name, size) {
   size = size || 22;
@@ -1390,10 +1768,48 @@ function applySiteContent() {
   });
   document.querySelectorAll('[data-content-href]').forEach(function (el) {
     const key = el.dataset.contentHref;
-    if (key === 'whatsapp_number' && siteContent.whatsapp_number) {
-      el.href = 'https://wa.me/' + String(siteContent.whatsapp_number).replace(/[^0-9]/g, '');
+    if (key === 'whatsapp_number') {
+      if (siteContent.whatsapp_number) {
+        el.href = 'https://wa.me/' + String(siteContent.whatsapp_number).replace(/[^0-9]/g, '');
+      }
+    } else if (siteContent[key]) {
+      el.href = siteContent[key];
     }
   });
+
+  // Social quick links (footer icons) — left as-is until a URL is set,
+  // since an empty href would otherwise reload the current page.
+  ['facebook', 'instagram', 'twitter', 'linkedin'].forEach(function (name) {
+    const el = document.getElementById('social' + name.charAt(0).toUpperCase() + name.slice(1));
+    const url = siteContent['social_' + name + '_url'];
+    if (!el) return;
+    if (url) {
+      el.href = url;
+      el.removeAttribute('aria-disabled');
+    } else {
+      el.removeAttribute('href');
+      el.setAttribute('aria-disabled', 'true');
+    }
+  });
+
+  // Tap-to-call / tap-to-email quick action buttons on the Contact page
+  const toTelHref = function (raw) {
+    const digits = String(raw || '').replace(/[^0-9]/g, '');
+    if (!digits) return '';
+    return 'tel:+' + (digits.length <= 9 ? '237' + digits : digits);
+  };
+  const callBtn1 = document.getElementById('callPhone1Link');
+  if (callBtn1 && siteContent.contact_phone_1) callBtn1.href = toTelHref(siteContent.contact_phone_1);
+  const callBtn2 = document.getElementById('callPhone2Link');
+  if (callBtn2 && siteContent.contact_phone_2) callBtn2.href = toTelHref(siteContent.contact_phone_2);
+  const emailBtn = document.getElementById('emailUsLink');
+  if (emailBtn && siteContent.contact_email) emailBtn.href = 'mailto:' + siteContent.contact_email;
+
+  applyPageBanners();
+  applyImageField('about_image_url', 'aboutOverviewImg');
+  applyImageField('mission_image_url', 'missionImg');
+  applyImageField('vision_image_url', 'visionImg');
+  applyImageField('gm_photo_url', 'gmPhotoImg', 'gmAvatar');
 
   const heroSection = document.getElementById('heroSection');
   const heroBgVideo = document.getElementById('heroBgVideo');
@@ -1416,6 +1832,57 @@ function applySiteContent() {
       heroBgImage.hidden = true;
       heroSection.classList.remove('has-bg-media');
     }
+  }
+}
+
+// ============================================
+// PAGE BANNERS — background image on the About / Services /
+// Membership / Branches / Reports / Contact page headers.
+// Shows the branded gradient alone until an image is set.
+// ============================================
+const pageBannerKeys = {
+  aboutBanner: 'about_hero_image_url',
+  servicesBanner: 'services_hero_image_url',
+  membershipBanner: 'membership_hero_image_url',
+  branchesBanner: 'branches_hero_image_url',
+  reportsBanner: 'reports_hero_image_url',
+  contactBanner: 'contact_hero_image_url'
+};
+function applyPageBanners() {
+  Object.keys(pageBannerKeys).forEach(function (bannerId) {
+    const banner = document.getElementById(bannerId);
+    if (!banner) return;
+    const img = banner.querySelector('.page-banner-media img');
+    if (!img) return;
+    const url = siteContent[pageBannerKeys[bannerId]];
+    if (url) {
+      if (img.getAttribute('src') !== url) img.src = url;
+      img.hidden = false;
+      banner.classList.add('has-banner-img');
+    } else {
+      img.hidden = true;
+      banner.classList.remove('has-banner-img');
+    }
+  });
+}
+
+// ============================================
+// IMAGE FIELD HELPER — for single static images (About page
+// Overview / Mission / Vision / GM photo). Shows a themed icon
+// fallback until a real image is set via the admin dashboard.
+// ============================================
+function applyImageField(key, imgId, wrapId) {
+  const img = document.getElementById(imgId);
+  if (!img) return;
+  const wrap = wrapId ? document.getElementById(wrapId) : img.closest('.img-fallback-wrap');
+  const url = siteContent[key];
+  if (url) {
+    if (img.getAttribute('src') !== url) img.src = url;
+    img.hidden = false;
+    if (wrap) wrap.classList.add('has-image');
+  } else {
+    img.hidden = true;
+    if (wrap) wrap.classList.remove('has-image');
   }
 }
 
@@ -1481,7 +1948,7 @@ function animateStatValue(el) {
 async function loadContent() {
   if (!db) return false;
   try {
-    const [svc, val, board, news, rep, frm, sc, faq, brc] = await Promise.all([
+    const [svc, val, board, news, rep, frm, sc, faq, brc, tst] = await Promise.all([
       db.from('services').select('*').order('sort_order'),
       db.from('core_values').select('*').order('sort_order'),
       db.from('board_members').select('*').order('sort_order'),
@@ -1490,7 +1957,8 @@ async function loadContent() {
       db.from('forms').select('*').order('sort_order'),
       db.from('site_content').select('*'),
       db.from('faqs').select('*').order('sort_order'),
-      db.from('branches').select('*').order('sort_order')
+      db.from('branches').select('*').order('sort_order'),
+      db.from('testimonials').select('*').order('sort_order')
     ]);
     if (svc.error) throw svc.error;
 
@@ -1503,6 +1971,7 @@ async function loadContent() {
     if (sc.data) sc.data.forEach(function (row) { siteContent[row.key] = row.value; });
     if (faq.data) faqs.splice(0, faqs.length, ...faq.data.map(function (r) { return { question: r.question, answer: r.answer, category: r.category }; }));
     if (brc.data) branches.splice(0, branches.length, ...brc.data.map(function (r) { return { name: r.name, address: r.address, phone: r.phone, hours: r.hours, is_headquarters: r.is_headquarters, tags: r.tags, photo_url: r.photo_url }; }));
+    if (tst.data) testimonials.splice(0, testimonials.length, ...tst.data.map(function (r) { return { name: r.name, role: r.role, message: r.message, rating: r.rating, photo_url: r.photo_url }; }));
     return true;
   } catch (err) {
     console.warn('Supabase content fetch failed, staying on defaults:', err);
@@ -1534,7 +2003,7 @@ function renderServices() {
     if (!items.length) return '';
     const meta = categoryMeta[cat];
     const cards = items.map(function (s, idx) {
-      return '<div class="service-card reveal-fade" style="transition-delay:' + staggerDelay(idx) + '"><div class="icon-circle">' + icon(meta.icon, 20) + '</div><h4>' + escapeHTML(s.name) + '</h4><p>' + escapeHTML(s.desc) + '</p></div>';
+      return '<div class="service-card reveal-fade" style="transition-delay:' + staggerDelay(idx) + '"><div class="icon-circle">' + icon(meta.icon, 20) + '</div><h4>' + escapeHTML(s.name) + '</h4><p>' + escapeHTML(s.desc) + '</p><a href="#membership" data-page="membership" class="btn btn-outline btn-sm card-cta">Open an Account</a></div>';
     }).join('');
     return '<div class="service-group"><h3 class="service-group-title">' + escapeHTML(meta.label) + '</h3><div class="service-cards">' + cards + '</div></div>';
   }).join('');
@@ -1696,7 +2165,7 @@ function renderFaqList() {
   el.innerHTML = items.map(function (f, idx) {
     return '<details class="numbered-step-wrap reveal" style="transition-delay:' + staggerDelay(idx) + '"><summary class="numbered-step" style="gap:14px;"><div class="step-body"><h4 style="margin-bottom:0;">' + escapeHTML(f.question) + '</h4></div>' +
       '<svg class="step-chevron" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></summary>' +
-      '<div class="step-extra" style="padding-left:0;">' + escapeHTML(f.answer) + '</div></details>';
+      '<div class="step-extra"><div class="step-extra-inner" style="padding-left:0;">' + escapeHTML(f.answer) + '</div></div></details>';
   }).join('');
 }
 
@@ -1711,7 +2180,6 @@ document.addEventListener('click', function (e) {
   faqActiveCategory = btn.dataset.faqCat || null;
   renderFaqs();
   observeReveals();
-  initSmoothDetails();
 });
 
 document.addEventListener('input', function (e) {
@@ -1719,7 +2187,6 @@ document.addEventListener('input', function (e) {
     faqSearchTerm = e.target.value;
     renderFaqList();
     observeReveals();
-    initSmoothDetails();
   }
 });
 
@@ -1736,7 +2203,7 @@ function renderBranches() {
   el.innerHTML = branches.map(function (b, idx) {
     const img = b.photo_url
       ? '<img src="' + escapeHTML(b.photo_url) + '" alt="" style="width:100%; aspect-ratio:4/3; object-fit:cover; border-radius:var(--radius-md) var(--radius-md) 0 0;">'
-      : '';
+      : '<div style="width:100%; aspect-ratio:4/3; background:var(--sky-tint); border-radius:var(--radius-md) var(--radius-md) 0 0; display:flex; align-items:center; justify-content:center; color:var(--slate-blue); opacity:0.55;">' + icon('pin', 40) + '</div>';
     const badge = b.is_headquarters ? '<span class="tag-soon" style="margin-bottom:10px;">Headquarters</span>' : '';
     const tags = (b.tags || '').split(',').map(function (t) { return t.trim(); }).filter(Boolean)
       .map(function (t) { return '<span class="tag-soon" style="margin:0 6px 6px 0;">' + escapeHTML(t) + '</span>'; }).join('');
@@ -1746,7 +2213,35 @@ function renderBranches() {
       (b.address ? '<p style="font-size:0.88rem; margin-bottom:6px; display:flex; gap:8px;">' + icon('pin', 16) + escapeHTML(b.address) + '</p>' : '') +
       (b.phone ? '<p style="font-size:0.88rem; margin-bottom:6px; display:flex; gap:8px;">' + icon('phone', 16) + escapeHTML(b.phone) + '</p>' : '') +
       (b.hours ? '<p style="font-size:0.88rem; margin-bottom:14px; display:flex; gap:8px;">' + icon('clock', 16) + escapeHTML(b.hours) + '</p>' : '') +
-      '<div>' + tags + '</div>' +
+      '<div style="margin-bottom:6px;">' + tags + '</div>' +
+      '<a href="#contact" data-page="contact" class="btn btn-outline btn-sm card-cta">Contact Us</a>' +
+      '</div></div>';
+  }).join('');
+}
+
+function renderTestimonials() {
+  const el = document.getElementById('testimonialsGrid');
+  if (!el) return;
+  if (!testimonials.length) {
+    el.innerHTML = '<div class="card" style="grid-column:1/-1; text-align:center; padding:50px 30px;"><p style="margin:0;">Member reviews are on the way.</p></div>';
+    return;
+  }
+  el.innerHTML = testimonials.map(function (t, idx) {
+    const rating = Math.max(0, Math.min(5, parseInt(t.rating, 10) || 5));
+    const stars = Array.from({ length: 5 }).map(function (_, i) {
+      const filled = i < rating;
+      return '<svg viewBox="0 0 24 24" width="14" height="14" fill="' + (filled ? 'currentColor' : 'none') + '" stroke="currentColor" stroke-width="1.6" class="' + (filled ? '' : 'star-off') + '">' + icons.star + '</svg>';
+    }).join('');
+    const avatar = t.photo_url
+      ? '<img src="' + escapeHTML(t.photo_url) + '" alt="">'
+      : icon('person', 20);
+    return '<div class="card testimonial-card reveal-fade" style="transition-delay:' + staggerDelay(idx) + '">' +
+      '<div class="testimonial-stars">' + stars + '</div>' +
+      '<p class="testimonial-message">"' + escapeHTML(t.message) + '"</p>' +
+      '<div class="testimonial-person">' +
+      '<div class="testimonial-avatar">' + avatar + '</div>' +
+      '<div><div class="testimonial-name">' + escapeHTML(t.name) + '</div>' +
+      (t.role ? '<div class="testimonial-role">' + escapeHTML(t.role) + '</div>' : '') + '</div>' +
       '</div></div>';
   }).join('');
 }
@@ -1860,7 +2355,8 @@ async function submitApplication(form) {
     phone: phone,
     email: form.elements.email.value.trim() || null,
     account_type: form.elements.account_type.value,
-    message: form.elements.message.value.trim() || null
+    message: form.elements.message.value.trim() || null,
+    terms_accepted: !!(form.elements.terms_accepted && form.elements.terms_accepted.checked)
   };
 
   btn.disabled = true;
@@ -1886,46 +2382,78 @@ async function submitApplication(form) {
 }
 
 // ============================================
-// SMOOTH ACCORDION — animates details/summary open-close
-// height instead of the native instant snap.
+// SMOOTH ACCORDION — one delegated listener drives every
+// .numbered-step-wrap on the page (FAQ answers, the 5 membership
+// steps). Delegation means items rendered later by renderFaqList()
+// are covered automatically, with no re-init call needed anywhere.
+// The .is-open class (not the native [open] attribute) drives the
+// chevron rotation, so it turns in sync with the height animation
+// in both directions instead of lagging behind on close.
+// Each list is also "exclusive": opening one item smoothly closes
+// whichever sibling item (within that same list) was already open,
+// so only one FAQ — or one of the 5 steps — is expanded at a time.
 // ============================================
-function initSmoothDetails(root) {
-  (root || document).querySelectorAll('.numbered-step-wrap').forEach(function (details) {
-    if (details.dataset.smoothInit) return;
-    details.dataset.smoothInit = '1';
-    const summary = details.querySelector('summary');
-    const content = details.querySelector('.step-extra');
-    if (!summary || !content) return;
-    summary.addEventListener('click', function (e) {
-      e.preventDefault();
-      const isOpen = details.hasAttribute('open');
-      if (isOpen) {
-        content.style.height = content.scrollHeight + 'px';
-        requestAnimationFrame(function () {
-          requestAnimationFrame(function () { content.style.height = '0px'; });
-        });
-        content.addEventListener('transitionend', function handler(ev) {
-          if (ev.propertyName && ev.propertyName !== 'height') return;
-          details.removeAttribute('open');
-          content.style.height = '';
-          content.removeEventListener('transitionend', handler);
-        });
-      } else {
-        details.setAttribute('open', '');
-        const target = content.scrollHeight;
-        content.style.height = '0px';
-        requestAnimationFrame(function () {
-          requestAnimationFrame(function () { content.style.height = target + 'px'; });
-        });
-        content.addEventListener('transitionend', function handler(ev) {
-          if (ev.propertyName && ev.propertyName !== 'height') return;
-          content.style.height = '';
-          content.removeEventListener('transitionend', handler);
-        });
-      }
-    });
+function openAccordion(details) {
+  const content = details.querySelector('.step-extra');
+  if (!content || details.dataset.animating) return;
+  details.dataset.animating = '1';
+  details.setAttribute('open', '');
+  details.classList.add('is-open');
+  const target = content.scrollHeight;
+  content.style.height = '0px';
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () { content.style.height = target + 'px'; });
+  });
+  content.addEventListener('transitionend', function handler(ev) {
+    if (ev.propertyName && ev.propertyName !== 'height') return;
+    content.style.height = '';
+    content.removeEventListener('transitionend', handler);
+    delete details.dataset.animating;
   });
 }
+
+function closeAccordion(details) {
+  const content = details.querySelector('.step-extra');
+  if (!content || details.dataset.animating) return;
+  details.dataset.animating = '1';
+  details.classList.remove('is-open');
+  content.style.height = content.scrollHeight + 'px';
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () { content.style.height = '0px'; });
+  });
+  content.addEventListener('transitionend', function handler(ev) {
+    if (ev.propertyName && ev.propertyName !== 'height') return;
+    details.removeAttribute('open');
+    content.style.height = '';
+    content.removeEventListener('transitionend', handler);
+    delete details.dataset.animating;
+  });
+}
+
+document.addEventListener('click', function (e) {
+  const summary = e.target.closest('.numbered-step-wrap > summary');
+  if (!summary) return;
+  e.preventDefault();
+  const details = summary.parentElement;
+  if (!details.querySelector('.step-extra') || details.dataset.animating) return;
+
+  if (details.hasAttribute('open')) {
+    closeAccordion(details);
+    return;
+  }
+
+  // Opening this one — collapse any other open item in the same
+  // list first (same parent = same accordion group), so FAQ answers
+  // and the 5 membership steps each only ever show one at a time.
+  if (details.parentElement) {
+    Array.from(details.parentElement.children).forEach(function (el) {
+      if (el !== details && el.classList && el.classList.contains('numbered-step-wrap') && el.hasAttribute('open')) {
+        closeAccordion(el);
+      }
+    });
+  }
+  openAccordion(details);
+});
 
 function renderAll() {
   applySiteContent();
@@ -1937,8 +2465,8 @@ function renderAll() {
   renderForms();
   renderFaqs();
   renderBranches();
+  renderTestimonials();
   initStatsCountUp();
-  initSmoothDetails();
 }
 
 function refreshDynamicContent() {
@@ -1982,6 +2510,9 @@ function showPage(id, param) {
   if (target === 'reports') {
     renderReports(param || null);
     renderReportsYearPills(param || null);
+  }
+  if (target === 'terms') {
+    switchLegalTab(param === 'cookies' ? 'cookies' : 'terms');
   }
 
   const activePage = pages.filter(function (p) { return p.id === target; })[0];
@@ -2081,6 +2612,58 @@ document.addEventListener('submit', function (e) {
     window.location.href = 'mailto:' + siteContent.contact_email + '?subject=' + subject + '&body=' + body;
   }
 });
+
+// ============================================
+// TERMS & COOKIE POLICY TABS
+// ============================================
+function switchLegalTab(tab) {
+  const termsBtn = document.getElementById('termsTabBtn');
+  const cookiesBtn = document.getElementById('cookiesTabBtn');
+  const termsPanel = document.getElementById('termsTabPanel');
+  const cookiesPanel = document.getElementById('cookiesTabPanel');
+  if (!termsBtn || !cookiesBtn || !termsPanel || !cookiesPanel) return;
+  const showCookies = tab === 'cookies';
+  termsBtn.classList.toggle('active', !showCookies);
+  cookiesBtn.classList.toggle('active', showCookies);
+  termsPanel.classList.toggle('active', !showCookies);
+  cookiesPanel.classList.toggle('active', showCookies);
+}
+document.addEventListener('click', function (e) {
+  const btn = e.target.closest('.tab-btn[data-tab]');
+  if (!btn) return;
+  switchLegalTab(btn.dataset.tab);
+  if (history.replaceState) {
+    history.replaceState(null, '', btn.dataset.tab === 'cookies' ? '#terms/cookies' : '#terms');
+  }
+});
+
+// ============================================
+// COOKIE CONSENT BANNER — a lightweight, dismissible notice.
+// Choice is remembered locally; this is a real deployed page
+// (not a Claude artifact preview), so localStorage is fine here.
+// ============================================
+(function () {
+  const banner = document.getElementById('cookieBanner');
+  if (!banner) return;
+  const STORAGE_KEY = 'ttccul_cookie_consent';
+  let stored = null;
+  try { stored = localStorage.getItem(STORAGE_KEY); } catch (err) { stored = null; }
+  if (!stored) {
+    setTimeout(function () {
+      banner.classList.add('visible');
+      document.body.classList.add('cookie-banner-visible');
+    }, 700);
+  }
+  function dismiss(value) {
+    try { localStorage.setItem(STORAGE_KEY, value); } catch (err) { /* private browsing etc. — fine to no-op */ }
+    banner.classList.remove('visible');
+    document.body.classList.remove('cookie-banner-visible');
+  }
+  const acceptBtn = document.getElementById('cookieAcceptBtn');
+  const declineBtn = document.getElementById('cookieDeclineBtn');
+  if (acceptBtn) acceptBtn.addEventListener('click', function () { dismiss('accepted'); });
+  if (declineBtn) declineBtn.addEventListener('click', function () { dismiss('declined'); });
+})();
 
 // ============================================
 // INIT — render instantly from defaults (zero delay,

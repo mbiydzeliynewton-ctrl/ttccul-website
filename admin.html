@@ -248,6 +248,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
       <button data-section="core_values">Core Values</button>
       <button data-section="board_members">Board Members</button>
       <button data-section="news_items">News &amp; Updates</button>
+      <button data-section="testimonials">Members Reviews</button>
       <button data-section="reports">Annual Reports (AGM)</button>
       <button data-section="forms">Downloadable Forms</button>
       <button data-section="faqs">FAQs</button>
@@ -387,6 +388,19 @@ const tableConfigs = {
     ],
     listTitle: function (r) { return r.title; }
   },
+  testimonials: {
+    label: 'Members Reviews', table: 'testimonials', orderBy: 'sort_order',
+    fields: [
+      { key: 'name', label: 'Member Name (e.g. "Grace M." — first name + initial reads well)', type: 'text', required: true },
+      { key: 'role', label: 'Descriptor (e.g. "Member since 2019")', type: 'text' },
+      { key: 'message', label: 'Review', type: 'textarea', required: true },
+      { key: 'rating', label: 'Rating', type: 'select', asNumber: true, options: [['5', '5 Stars'], ['4', '4 Stars'], ['3', '3 Stars'], ['2', '2 Stars'], ['1', '1 Star']], default: '5' },
+      { key: 'photo_url', label: 'Photo (optional)', type: 'file', bucket: 'site-images', accept: 'image/png,image/jpeg,image/webp,image/gif', preview: 'image', maxMB: 5 },
+      { key: 'sort_order', label: 'Sort Order', type: 'number', default: 0 }
+    ],
+    listTitle: function (r) { return r.name; },
+    listSubtitle: function (r) { return r.role || ''; }
+  },
   reports: {
     label: 'Annual Reports (AGM Sessions)', table: 'reports', orderBy: 'sort_order',
     fields: [
@@ -464,18 +478,37 @@ const siteContentGroups = [
     ['stat4_value', 'Stat 4 Value', 'text'], ['stat4_label', 'Stat 4 Label', 'text']
   ]},
   { title: 'Mission & Vision', fields: [
-    ['mission_text', 'Mission Statement', 'textarea'], ['vision_text', 'Vision Statement', 'textarea']
+    ['mission_text', 'Mission Statement', 'textarea'],
+    ['mission_image_url', 'Mission Image', 'image', 'site-images', 'image/png,image/jpeg,image/webp,image/gif', 8],
+    ['vision_text', 'Vision Statement', 'textarea'],
+    ['vision_image_url', 'Vision Image', 'image', 'site-images', 'image/png,image/jpeg,image/webp,image/gif', 8]
   ]},
   { title: 'About Page Overview', fields: [
-    ['about_overview', 'Overview — leave a blank line between paragraphs', 'textarea-lg']
+    ['about_overview', 'Overview — leave a blank line between paragraphs', 'textarea-lg'],
+    ['about_image_url', 'Overview Image', 'image', 'site-images', 'image/png,image/jpeg,image/webp,image/gif', 8]
   ]},
   { title: 'General Manager Message', fields: [
-    ['gm_name', 'Name', 'text'], ['gm_title', 'Title', 'text'], ['gm_quote', 'Quote', 'textarea']
+    ['gm_name', 'Name', 'text'], ['gm_title', 'Title', 'text'], ['gm_quote', 'Quote', 'textarea'],
+    ['gm_photo_url', 'Photo', 'image', 'site-images', 'image/png,image/jpeg,image/webp,image/gif', 5]
+  ]},
+  { title: 'Page Banner Images', fields: [
+    ['about_hero_image_url', 'About Us Page', 'image', 'site-images', 'image/png,image/jpeg,image/webp,image/gif', 8],
+    ['services_hero_image_url', 'Services Page', 'image', 'site-images', 'image/png,image/jpeg,image/webp,image/gif', 8],
+    ['membership_hero_image_url', 'Membership Page', 'image', 'site-images', 'image/png,image/jpeg,image/webp,image/gif', 8],
+    ['branches_hero_image_url', 'Branches Page', 'image', 'site-images', 'image/png,image/jpeg,image/webp,image/gif', 8],
+    ['reports_hero_image_url', 'Annual Reports Page', 'image', 'site-images', 'image/png,image/jpeg,image/webp,image/gif', 8],
+    ['contact_hero_image_url', 'Contact Us Page', 'image', 'site-images', 'image/png,image/jpeg,image/webp,image/gif', 8]
   ]},
   { title: 'Contact Information', fields: [
     ['contact_phone_1', 'Phone 1', 'text'], ['contact_phone_2', 'Phone 2', 'text'],
     ['contact_email', 'Email', 'text'], ['contact_address', 'Address', 'text'],
-    ['office_hours', 'Office Hours', 'text'], ['whatsapp_number', 'WhatsApp Number (digits only, with country code)', 'text']
+    ['office_hours', 'Office Hours', 'text'], ['whatsapp_number', 'WhatsApp Number (digits only, with country code)', 'text'],
+    ['social_facebook_url', 'Facebook URL', 'text'], ['social_instagram_url', 'Instagram URL', 'text'],
+    ['social_twitter_url', 'X (Twitter) URL', 'text'], ['social_linkedin_url', 'LinkedIn URL', 'text']
+  ]},
+  { title: 'Terms & Cookies Policy', fields: [
+    ['terms_conditions_text', 'Terms & Conditions — leave a blank line between sections', 'textarea-lg'],
+    ['cookies_policy_text', 'Cookie Policy — leave a blank line between sections', 'textarea-lg']
   ]}
 ];
 
@@ -749,8 +782,9 @@ document.getElementById('saveBtn').addEventListener('click', async function () {
     let v = el.value;
     if (f.type === 'number') v = v === '' ? (f.default || 0) : Number(v);
     if (f.asBoolean) v = (v === 'true');
+    if (f.asNumber) v = v === '' ? (f.default ? Number(f.default) : 0) : Number(v);
     if (f.required && (v === '' || v === null)) missing = true;
-    payload[f.key] = (v === '' && f.type !== 'number' && !f.asBoolean) ? null : v;
+    payload[f.key] = (v === '' && f.type !== 'number' && !f.asBoolean && !f.asNumber) ? null : v;
   });
   if (missing) { showToast('Please fill in all required fields.', true); return; }
 

@@ -89,6 +89,19 @@ create table if not exists public.faqs (
 );
 alter table public.faqs enable row level security;
 
+-- ---------- TESTIMONIALS (Members Reviews) ----------
+create table if not exists public.testimonials (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  role text,
+  message text not null,
+  rating int not null default 5,
+  photo_url text,
+  sort_order int not null default 0,
+  created_at timestamptz not null default now()
+);
+alter table public.testimonials enable row level security;
+
 -- ---------- BRANCHES ----------
 create table if not exists public.branches (
   id uuid primary key default gen_random_uuid(),
@@ -115,9 +128,11 @@ create table if not exists public.membership_applications (
   account_type text,
   message text,
   status text not null default 'new',
+  terms_accepted boolean not null default false,
   created_at timestamptz not null default now()
 );
 alter table public.membership_applications enable row level security;
+alter table public.membership_applications add column if not exists terms_accepted boolean not null default false;
 
 -- ---------- SITE TEXT CONTENT (key/value) ----------
 create table if not exists public.site_content (
@@ -134,12 +149,12 @@ alter table public.site_content enable row level security;
 -- ============================================================
 grant select on public.services, public.core_values, public.board_members,
   public.news_items, public.forms, public.reports, public.site_content,
-  public.faqs, public.branches
+  public.faqs, public.branches, public.testimonials
   to anon, authenticated;
 
 grant insert, update, delete on public.services, public.core_values, public.board_members,
   public.news_items, public.forms, public.reports, public.site_content,
-  public.faqs, public.branches
+  public.faqs, public.branches, public.testimonials
   to authenticated;
 
 -- membership_applications is different on purpose: the public can
@@ -157,7 +172,7 @@ declare
   admin_email text := 'info@ttccul.com';
   t text;
 begin
-  foreach t in array array['services','core_values','board_members','news_items','forms','reports','site_content','faqs','branches']
+  foreach t in array array['services','core_values','board_members','news_items','forms','reports','site_content','faqs','branches','testimonials']
   loop
     execute format('drop policy if exists "public read" on public.%I;', t);
     execute format('create policy "public read" on public.%I for select to anon, authenticated using (true);', t);
@@ -268,6 +283,14 @@ select * from (values
 ) as v(name, address, phone, hours, is_headquarters, tags, sort_order)
 where not exists (select 1 from public.branches);
 
+insert into public.testimonials (name, role, message, rating, sort_order)
+select * from (values
+  ('Akoson E.','Member since 2016','TTCCUL helped me open my first business loan when no bank in town would look at me twice. Fair rates and people who actually know your name.',5,1),
+  ('Divine N.','Member since 2019','The Akawo daily savings collection changed how I save. Small amounts every day added up faster than I expected, and the staff make it easy.',5,2),
+  ('Grace M.','Member since 2012','One member, one vote actually means something here. I''ve watched this union grow for over a decade and it still feels like it belongs to us.',5,3)
+) as v(name, role, message, rating, sort_order)
+where not exists (select 1 from public.testimonials);
+
 insert into public.site_content (key, value)
 select * from (values
   ('hero_badge','Serving Tole-Buea Since 1970'),
@@ -314,6 +337,81 @@ select * from (values
 ) as v(key, value)
 on conflict (key) do nothing;
 
+-- Added for: page banner images, About page images, social links, legal pages.
+-- Own guard so these insert even on databases that already ran earlier seed blocks.
+insert into public.site_content (key, value)
+values
+  ('about_hero_image_url', ''),
+  ('services_hero_image_url', ''),
+  ('membership_hero_image_url', ''),
+  ('branches_hero_image_url', ''),
+  ('reports_hero_image_url', ''),
+  ('contact_hero_image_url', ''),
+  ('about_image_url', ''),
+  ('mission_image_url', ''),
+  ('vision_image_url', ''),
+  ('gm_photo_url', ''),
+  ('social_facebook_url', ''),
+  ('social_instagram_url', ''),
+  ('social_twitter_url', ''),
+  ('social_linkedin_url', '')
+on conflict (key) do nothing;
+
+insert into public.site_content (key, value)
+values (
+  'terms_conditions_text',
+  'Welcome to the Tole Tea Cooperative Credit Union Ltd (TTCCUL) website. By accessing or using this website, you agree to be bound by the following terms and conditions. Please read them carefully before proceeding.
+
+1. Acceptance of Terms
+By using this website you confirm that you accept these Terms and Conditions and agree to comply with them. If you do not agree, please do not use this website.
+
+2. Membership and Eligibility
+Membership in TTCCUL is open to individuals who meet our eligibility criteria and complete the membership application process, including payment of applicable shares and fees. Submitting an application through this website does not guarantee membership; all applications are subject to review and approval.
+
+3. Use of This Website
+This website is provided for informational purposes and to facilitate membership applications, service enquiries, and communication with TTCCUL. You agree to use this website only for lawful purposes and not to misuse any form, contact channel, or content provided here.
+
+4. Accuracy of Information
+While we make every effort to keep information on this website accurate and up to date, interest rates, fees, branch details, and other figures are indicative and may change without notice. Please confirm current rates and terms with a branch official before making financial decisions.
+
+5. Loan and Savings Calculators
+Any calculator tools on this website provide estimates only, based on the figures entered and current indicative rates. They do not constitute a loan offer, a savings contract, or financial advice, and actual terms may differ.
+
+6. Limitation of Liability
+TTCCUL will not be held liable for any loss or damage arising from use of this website, including reliance on any information, calculator estimate, or third-party link contained on it.
+
+7. Governing Law
+These terms are governed by the laws of the Republic of Cameroon.
+
+8. Changes to These Terms
+We may update these Terms and Conditions from time to time. Continued use of the website after changes are posted constitutes acceptance of the revised terms.
+
+9. Contact Us
+Questions about these terms can be directed to us using the contact details on our Contact Us page.'
+), (
+  'cookies_policy_text',
+  'This Cookie Policy explains how Tole Tea Cooperative Credit Union Ltd (TTCCUL) uses cookies and similar technologies on this website.
+
+1. What Are Cookies
+Cookies are small text files placed on your device when you visit a website. They help the site function properly and can also be used to remember your preferences.
+
+2. How We Use Cookies
+We use cookies to keep essential parts of this website working correctly, to remember choices such as dismissing the cookie notice, and to understand, in a general way, how visitors use the site so we can improve it.
+
+3. Types of Cookies We Use
+Essential cookies are required for core website functionality. Preference cookies remember choices like cookie consent. We do not currently use cookies for advertising or third-party tracking.
+
+4. Managing Your Preferences
+Most web browsers allow control of cookies through browser settings, including blocking or deleting them. Doing so may affect how parts of this website function.
+
+5. Changes to This Policy
+We may update this Cookie Policy from time to time to reflect changes in the technology we use or for legal reasons.
+
+6. Contact Us
+Questions about our use of cookies can be directed to us using the contact details on our Contact Us page.'
+)
+on conflict (key) do nothing;
+
 -- ============================================================
 -- STORAGE — board member photos & downloadable form files
 -- Safe to re-run.
@@ -324,7 +422,8 @@ values
   ('forms-files', 'forms-files', true, 10485760, array['application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document']),
   ('agm-photos', 'agm-photos', true, 8388608, array['image/png','image/jpeg','image/webp','image/gif']),
   ('branch-photos', 'branch-photos', true, 5242880, array['image/png','image/jpeg','image/webp','image/gif']),
-  ('hero-video', 'hero-video', true, 31457280, array['video/mp4','video/webm'])
+  ('hero-video', 'hero-video', true, 31457280, array['video/mp4','video/webm']),
+  ('site-images', 'site-images', true, 8388608, array['image/png','image/jpeg','image/webp','image/gif'])
 on conflict (id) do update set
   public = excluded.public,
   file_size_limit = excluded.file_size_limit,
@@ -335,7 +434,7 @@ declare
   admin_email text := 'info@ttccul.com';
   b text;
 begin
-  foreach b in array array['board-photos','forms-files','agm-photos','branch-photos','hero-video']
+  foreach b in array array['board-photos','forms-files','agm-photos','branch-photos','hero-video','site-images']
   loop
     execute format('drop policy if exists "public read %s" on storage.objects;', b);
     execute format('create policy "public read %s" on storage.objects for select using (bucket_id = %L);', b, b);
