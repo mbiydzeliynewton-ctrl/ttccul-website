@@ -1,11 +1,11 @@
 -- ============================================================
--- TTCCUL — Supabase schema
+-- TTCCUL - Supabase schema
 -- Run this ONCE in your Supabase project's SQL Editor
 -- (Project → SQL Editor → New Query → paste all of this → Run)
 -- ============================================================
 -- NOTE ON GRANTS: since May 30 2026, new Supabase projects no
 -- longer auto-expose new tables to the Data API (the REST API
--- supabase-js talks to). RLS alone is not enough — each table
+-- supabase-js talks to). RLS alone is not enough - each table
 -- also needs an explicit GRANT, or every request fails with a
 -- "permission denied" (42501) error before RLS is even checked.
 -- This script grants both layers on purpose. If you ever add a
@@ -117,7 +117,7 @@ create table if not exists public.branches (
 alter table public.branches enable row level security;
 
 -- ---------- MEMBERSHIP APPLICATIONS ----------
--- Public can INSERT (submit an application) but never read/list —
+-- Public can INSERT (submit an application) but never read/list -
 -- only the admin can view or manage submissions. Different shape
 -- from every other table, so it gets its own policies below.
 create table if not exists public.membership_applications (
@@ -143,7 +143,7 @@ create table if not exists public.site_content (
 alter table public.site_content enable row level security;
 
 -- ============================================================
--- GRANTS — table-level "can this role touch this table at all"
+-- GRANTS - table-level "can this role touch this table at all"
 -- anon   = public site (read-only)
 -- authenticated = logged-in admin (read + write)
 -- ============================================================
@@ -158,13 +158,13 @@ grant insert, update, delete on public.services, public.core_values, public.boar
   to authenticated;
 
 -- membership_applications is different on purpose: the public can
--- SUBMIT (insert) an application but can never read the list back —
+-- SUBMIT (insert) an application but can never read the list back -
 -- only the admin can see who has applied.
 grant insert on public.membership_applications to anon, authenticated;
 grant select, update, delete on public.membership_applications to authenticated;
 
 -- ============================================================
--- RLS POLICIES — row-level "which rows, and who exactly"
+-- RLS POLICIES - row-level "which rows, and who exactly"
 -- Change the email below if the admin address ever changes.
 -- ============================================================
 do $$
@@ -201,7 +201,7 @@ begin
 end $$;
 
 -- ============================================================
--- SEED DATA — matches what's already live on the site today,
+-- SEED DATA - matches what's already live on the site today,
 -- so connecting Supabase changes nothing visually at first.
 -- Safe to run multiple times (checks for existing rows first).
 -- ============================================================
@@ -271,9 +271,9 @@ insert into public.faqs (question, answer, category, sort_order)
 select * from (values
   ('How do I become a member of TTCCUL?','Visit our office in Tole-Buea or reach out by phone or email, complete a membership application, provide valid identification, and open a shares account. See the Membership page for the full step-by-step process.','Membership',1),
   ('What savings options does TTCCUL offer?','Shares accounts, savings accounts, deposit accounts, minors accounts, group accounts, and daily savings (Akawo) collection. See the Services page for details on each.','Savings',2),
-  ('What is Akawo?','Akawo is doorstep daily savings collection — a traditional, convenient way to build your savings a little at a time without needing to visit the office every day.','Akawo',3),
+  ('What is Akawo?','Akawo is doorstep daily savings collection - a traditional, convenient way to build your savings a little at a time without needing to visit the office every day.','Akawo',3),
   ('What loans can I apply for?','Personal, business, agricultural and building loans, plus school fees loans, Akawo-linked loans, overdraft facilities and contract financing. Full list on the Services page.','Loans',4),
-  ('Do I need to be a member before applying for a loan?','Yes — loans are a membership benefit. Join first (see the Membership page), then loan products become available to you.','Loans',5)
+  ('Do I need to be a member before applying for a loan?','Yes - loans are a membership benefit. Join first (see the Membership page), then loan products become available to you.','Loans',5)
 ) as v(question, answer, category, sort_order)
 where not exists (select 1 from public.faqs);
 
@@ -295,14 +295,14 @@ insert into public.site_content (key, value)
 select * from (values
   ('hero_badge','Serving Tole-Buea Since 1970'),
   ('hero_headline','Where Community Saves, Grows & Thrives Together'),
-  ('hero_lead','A member-owned cooperative credit union built on mutual trust — savings, loans and financial inclusion for the people of Tole and beyond, at fair and honest rates.'),
+  ('hero_lead','A member-owned cooperative credit union built on mutual trust - savings, loans and financial inclusion for the people of Tole and beyond, at fair and honest rates.'),
   ('stat1_value','1970'), ('stat1_label','Founded'),
   ('stat2_value','56+'), ('stat2_label','Years of Continuous Service'),
   ('stat3_value','21+'), ('stat3_label','Products & Services Offered'),
   ('stat4_value','5'), ('stat4_label','Core Values We Operate By'),
-  ('mission_text','To continuously develop and sustain a secure, law-abiding cooperative credit union that provides quick and reliable financial services to our members for their financial and social development — while paying a fair rate of interest on their savings.'),
-  ('vision_text','To become a one-stop-shop financial institution, offering every product and service found at other microfinance institutions — delivering digital, accessible financial inclusion to our members at competitive rates.'),
-  ('about_overview','As a microfinance institution, we promote financial inclusion by offering affordable financial services — especially to low- and middle-income individuals with limited access to commercial banks.
+  ('mission_text','To continuously develop and sustain a secure, law-abiding cooperative credit union that provides quick and reliable financial services to our members for their financial and social development - while paying a fair rate of interest on their savings.'),
+  ('vision_text','To become a one-stop-shop financial institution, offering every product and service found at other microfinance institutions - delivering digital, accessible financial inclusion to our members at competitive rates.'),
+  ('about_overview','As a microfinance institution, we promote financial inclusion by offering affordable financial services - especially to low- and middle-income individuals with limited access to commercial banks.
 
 We mobilize savings from our members and use these funds to grant loans at fair, relatively low interest rates. TTCCUL operates on the principle of mutual assistance and democratic control: every member holds equal voting rights, regardless of the amount they''ve saved.
 
@@ -319,7 +319,7 @@ By encouraging saving habits and providing accessible credit, we contribute to p
 ) as v(key, value)
 where not exists (select 1 from public.site_content);
 
--- Added later than the block above — its own guard so it still
+-- Added later than the block above - its own guard so it still
 -- gets inserted even on databases that already ran the seed once.
 insert into public.site_content (key, value)
 values ('hero_image_url', ''), ('hero_video_url', '')
@@ -329,7 +329,7 @@ insert into public.site_content (key, value)
 select * from (values
   ('loan_interest_rate_annual', '15'),
   ('savings_interest_rate_annual', '5'),
-  ('step1_detail', 'Bring a valid ID. No appointment needed — walk-ins are welcome during office hours.'),
+  ('step1_detail', 'Bring a valid ID. No appointment needed - walk-ins are welcome during office hours.'),
   ('step2_detail', 'Applications are usually reviewed the same week.'),
   ('step3_detail', 'Bring a national ID card or passport, plus any document we ask for when you apply.'),
   ('step4_detail', 'Your shares purchase is what officially makes you a part-owner of the union.'),
@@ -413,7 +413,7 @@ Questions about our use of cookies can be directed to us using the contact detai
 on conflict (key) do nothing;
 
 -- ============================================================
--- STORAGE — board member photos & downloadable form files
+-- STORAGE - board member photos & downloadable form files
 -- Safe to re-run.
 -- ============================================================
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
