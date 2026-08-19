@@ -1,4 +1,3 @@
-
 /* ============================================
    RESET
    ============================================ */
@@ -154,8 +153,8 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 }
 .header-inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 700; font-size: 1.15rem; color: var(--white); }
-.brand .mark { width: 38px; height: 38px; color: #8FD79A; flex-shrink: 0; }
-.brand .mark.small { width: 38px; height: 38px; }
+.brand-mark { width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,0.14); flex-shrink: 0; display: flex; align-items: center; justify-content: center; padding: 5px; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18); }
+.brand-mark-img { width: 100%; height: 100%; object-fit: contain; }
 .brand-name { display: flex; flex-direction: column; line-height: 1.1; }
 .brand-name small { font-family: var(--font-body); font-weight: 500; font-size: 0.62rem; letter-spacing: 0.08em; color: #B9CBDC; text-transform: uppercase; }
 
@@ -552,6 +551,17 @@ a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visib
 .quick-action-btn svg { width: 16px; height: 16px; flex-shrink: 0; }
 
 /* ============================================
+   CALCULATOR — Loan Repayment / Savings Growth
+   ============================================ */
+.calc-card { padding: 36px; }
+.calc-mode-toggle { display: flex; gap: 8px; margin-bottom: 26px; }
+.calc-mode-toggle .btn { flex: 1; justify-content: center; }
+.calc-output-box { background: var(--ink-navy); border-radius: var(--radius-md); padding: 26px; color: var(--white); overflow: hidden; }
+.calc-result-value { font-family: var(--font-display); font-size: 2rem; font-weight: 700; margin-bottom: 18px; line-height: 1.15; word-break: break-word; }
+.calc-output-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 0.9rem; margin-top: 8px; }
+.calc-output-row:first-of-type { padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.15); margin-top: 0; }
+
+/* ============================================
    TABS — Terms & Conditions / Cookie Policy
    ============================================ */
 .tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--line); margin-bottom: 32px; flex-wrap: wrap; }
@@ -630,6 +640,11 @@ body.cookie-banner-visible .wa-fab { bottom: 104px; }
   .tabs { gap: 4px; }
   .tab-btn { padding: 10px 14px; font-size: 0.86rem; }
   .social-links { justify-content: center; }
+  .calc-card { padding: 24px 18px; }
+  .calc-mode-toggle { flex-direction: column; }
+  .calc-output-box { padding: 20px 18px; }
+  .calc-result-value { font-size: 1.5rem; }
+  .calc-output-row { font-size: 0.85rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

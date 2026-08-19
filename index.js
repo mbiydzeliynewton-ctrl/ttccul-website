@@ -1,4 +1,3 @@
-
 // ============================================
 // SUPABASE CONFIG
 // Fill these in after running schema.sql (see SETUP.md).
@@ -723,16 +722,16 @@ function updateCalculator() {
     const r = calcLoanRepayment(loanAmount, loanTerm);
     output.innerHTML =
       '<div style="font-size:0.8rem; opacity:0.7; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px;">Estimated Monthly Repayment</div>' +
-      '<div style="font-family:var(--font-display); font-size:2rem; font-weight:700; margin-bottom:18px;">' + formatFCFA(r.monthly) + '</div>' +
-      '<div style="display:flex; justify-content:space-between; padding-top:14px; border-top:1px solid rgba(255,255,255,0.15); font-size:0.9rem;"><span style="opacity:0.75;">Total Interest (est.)</span><strong>' + formatFCFA(r.totalInterest) + '</strong></div>' +
-      '<div style="display:flex; justify-content:space-between; margin-top:8px; font-size:0.9rem;"><span style="opacity:0.75;">Total Payable</span><strong>' + formatFCFA(r.totalPayable) + '</strong></div>';
+      '<div class="calc-result-value">' + formatFCFA(r.monthly) + '</div>' +
+      '<div class="calc-output-row"><span style="opacity:0.75;">Total Interest (est.)</span><strong>' + formatFCFA(r.totalInterest) + '</strong></div>' +
+      '<div class="calc-output-row"><span style="opacity:0.75;">Total Payable</span><strong>' + formatFCFA(r.totalPayable) + '</strong></div>';
   } else {
     const s = calcSavingsGrowth(savingsAmount, savingsTerm);
     output.innerHTML =
       '<div style="font-size:0.8rem; opacity:0.7; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px;">Projected Savings</div>' +
-      '<div style="font-family:var(--font-display); font-size:2rem; font-weight:700; margin-bottom:18px;">' + formatFCFA(s.futureValue) + '</div>' +
-      '<div style="display:flex; justify-content:space-between; padding-top:14px; border-top:1px solid rgba(255,255,255,0.15); font-size:0.9rem;"><span style="opacity:0.75;">Total Contributed</span><strong>' + formatFCFA(s.totalContributed) + '</strong></div>' +
-      '<div style="display:flex; justify-content:space-between; margin-top:8px; font-size:0.9rem;"><span style="opacity:0.75;">Interest Earned (est.)</span><strong>' + formatFCFA(s.interestEarned) + '</strong></div>';
+      '<div class="calc-result-value">' + formatFCFA(s.futureValue) + '</div>' +
+      '<div class="calc-output-row"><span style="opacity:0.75;">Total Contributed</span><strong>' + formatFCFA(s.totalContributed) + '</strong></div>' +
+      '<div class="calc-output-row"><span style="opacity:0.75;">Interest Earned (est.)</span><strong>' + formatFCFA(s.interestEarned) + '</strong></div>';
   }
 }
 
@@ -953,7 +952,14 @@ function showPage(id, param) {
   const title = activePage ? activePage.dataset.title : 'Home';
   document.title = (target === 'home' ? 'Tole Tea Cooperative Credit Union Ltd | TTCCUL' : title + ' | TTCCUL');
 
-  window.scrollTo(0, 0);
+  if (target === 'contact' && param === 'faq') {
+    requestAnimationFrame(function () {
+      const faqSection = document.getElementById('faqSection');
+      if (faqSection) faqSection.scrollIntoView({ block: 'start' });
+    });
+  } else {
+    window.scrollTo(0, 0);
+  }
   closeMobileMenu();
   requestAnimationFrame(observeReveals);
 }
@@ -1097,6 +1103,25 @@ document.addEventListener('click', function (e) {
   const declineBtn = document.getElementById('cookieDeclineBtn');
   if (acceptBtn) acceptBtn.addEventListener('click', function () { dismiss('accepted'); });
   if (declineBtn) declineBtn.addEventListener('click', function () { dismiss('declined'); });
+})();
+
+// ============================================
+// CONSOLE SECURITY WARNING — a real, common attack against bank
+// and credit union customers is "self-XSS": a scammer convinces a
+// member to paste malicious code into their own browser console
+// (e.g. "paste this to unlock a reward" / "paste this to verify
+// your account"), which then runs with full access to this page.
+// This warning is standard practice on banking sites for exactly
+// that reason. It has nothing to do with hiding source code —
+// nothing shown in DevTools ever does that; see the note further
+// down before assuming otherwise.
+// ============================================
+(function () {
+  try {
+    console.log('%cStop!', 'font-size:46px; font-weight:800; color:#B3432B;');
+    console.log('%cThis is a browser feature meant for developers. If someone told you to paste something here to "verify your account," get a refund, or unlock a feature, it is a scam — pasting it will give them access to your account.', 'font-size:15px; color:#0F2C4C; line-height:1.6;');
+    console.log('%cTTCCUL will never ask you to paste anything into this console.', 'font-size:15px; font-weight:700; color:#0F2C4C;');
+  } catch (e) { /* console unavailable in some contexts - fail silently */ }
 })();
 
 // ============================================
